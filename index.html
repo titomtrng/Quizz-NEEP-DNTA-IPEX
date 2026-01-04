@@ -1,0 +1,2251 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Réseaux Avancés - NEEP, DNTA, IPEX</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ===== MOBILE-FIRST BASE STYLES ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html {
+            font-size: 16px;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            min-height: 100vh;
+            min-height: 100dvh;
+            /* Dynamic viewport height for mobile */
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            background-attachment: fixed;
+            color: #e0e0e0;
+            padding: 12px;
+            padding-bottom: calc(160px + env(safe-area-inset-bottom, 0px));
+            /* Space for fixed buttons */
+            overflow-x: hidden;
+        }
+
+        /* ===== HEADER - Compact for mobile ===== */
+        header {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 16px;
+            border-radius: 16px;
+            margin-bottom: 16px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 13px;
+            margin-top: 6px;
+            opacity: 0.8;
+            font-weight: 500;
+        }
+
+        /* ===== QUIZ INFO - Collapsible on mobile ===== */
+        .quiz-info {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 14px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            border-left: 3px solid #667eea;
+            font-size: 13px;
+            display: none;
+            /* Hidden by default on mobile */
+        }
+
+        .quiz-info p {
+            margin-bottom: 8px;
+        }
+
+        .quiz-info p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* ===== PROGRESS BAR ===== */
+        .progress-bar {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin: 12px 0;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 10px;
+        }
+
+        .question-counter {
+            text-align: center;
+            margin-bottom: 12px;
+            font-weight: 600;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* ===== QUESTION CONTAINER ===== */
+        .question-container {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .question-number {
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 8px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .question-text {
+            margin-bottom: 20px;
+            font-size: 16px;
+            font-weight: 500;
+            color: #ffffff;
+            line-height: 1.6;
+        }
+
+        .options-container {
+            margin-bottom: 16px;
+        }
+
+        /* ===== OPTIONS - Large touch targets ===== */
+        .option {
+            margin-bottom: 10px;
+            padding: 16px;
+            min-height: 56px;
+            /* 48px+ touch target */
+            border-radius: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: rgba(255, 255, 255, 0.03);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            position: relative;
+            /* No hover transform on mobile - it feels weird */
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .option:active {
+            transform: scale(0.98);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .option input[type="radio"],
+        .option input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 26px;
+            height: 26px;
+            min-width: 26px;
+            border: 2px solid rgba(255, 255, 255, 0.35);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .option input[type="checkbox"] {
+            border-radius: 8px;
+        }
+
+        .option input[type="radio"]:checked,
+        .option input[type="checkbox"]:checked {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea;
+        }
+
+        .option input[type="radio"]:checked::after,
+        .option input[type="checkbox"]:checked::after {
+            content: '✓';
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .option label {
+            cursor: pointer;
+            flex: 1;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        .option.selected {
+            background: rgba(102, 126, 234, 0.18);
+            border-color: #667eea;
+        }
+
+        .option.correct {
+            background: rgba(16, 185, 129, 0.18);
+            border-color: #10b981;
+            animation: pulse-success 0.4s ease-out;
+        }
+
+        .option.incorrect {
+            background: rgba(239, 68, 68, 0.18);
+            border-color: #ef4444;
+            animation: shake 0.4s ease-out;
+        }
+
+        @keyframes pulse-success {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.01);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-4px);
+            }
+
+            75% {
+                transform: translateX(4px);
+            }
+        }
+
+        /* ===== EXPLANATION ===== */
+        .explanation {
+            display: none;
+            margin-top: 16px;
+            padding: 14px;
+            background: rgba(102, 126, 234, 0.12);
+            border-radius: 12px;
+            border-left: 3px solid #667eea;
+            animation: slideDown 0.3s ease-out;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .explanation.show {
+            display: block;
+        }
+
+        .explanation strong {
+            color: #667eea;
+        }
+
+        .multi-warning {
+            color: #fbbf24;
+            font-size: 12px;
+            margin-top: 12px;
+            display: none;
+            padding: 10px 12px;
+            background: rgba(251, 191, 36, 0.12);
+            border-radius: 10px;
+            border: 1px solid rgba(251, 191, 36, 0.25);
+            text-align: center;
+        }
+
+        /* ===== THEME BADGES ===== */
+        .theme-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 16px;
+            font-size: 10px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .neep-badge {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(37, 99, 235, 0.2) 100%);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .dnta-badge {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(5, 150, 105, 0.2) 100%);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .ipex-badge {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(217, 119, 6, 0.2) 100%);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        /* ===== FIXED BOTTOM BUTTONS - Key for mobile UX ===== */
+        .buttons-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 12px;
+            padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+            background: linear-gradient(to top, rgba(15, 12, 41, 0.98) 0%, rgba(15, 12, 41, 0.95) 80%, transparent 100%);
+            z-index: 100;
+        }
+
+        button {
+            padding: 16px 24px;
+            min-height: 52px;
+            /* Large touch target */
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            width: 100%;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        button:active {
+            transform: scale(0.98);
+            opacity: 0.9;
+        }
+
+        button:disabled {
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: none;
+            cursor: not-allowed;
+            color: rgba(255, 255, 255, 0.35);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .nav-buttons button {
+            flex: 1;
+        }
+
+        #prev-btn {
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: none;
+        }
+
+        #prev-btn:not(:disabled):active {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* ===== RESULTS ===== */
+        .results-container {
+            display: none;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px 20px;
+            margin-top: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .results-container.show {
+            display: block;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .results-container h2 {
+            font-size: 22px;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .score {
+            font-size: 56px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 20px 0;
+        }
+
+        .score-text {
+            font-size: 15px;
+            margin-bottom: 30px;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.6;
+        }
+
+        .restart-btn {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        /* Hide scrollbar on mobile for cleaner look */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+
+        body {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* ===== TABLET & DESKTOP STYLES ===== */
+        @media (min-width: 768px) {
+            body {
+                padding: 30px;
+                padding-bottom: 30px;
+            }
+
+            .quiz-info {
+                display: block;
+                padding: 20px;
+                font-size: 14px;
+            }
+
+            header {
+                padding: 30px;
+                border-radius: 20px;
+                margin-bottom: 30px;
+            }
+
+            h1 {
+                font-size: 32px;
+            }
+
+            .subtitle {
+                font-size: 16px;
+            }
+
+            .question-container {
+                padding: 30px;
+                border-radius: 20px;
+                max-width: 800px;
+                margin: 0 auto 20px;
+            }
+
+            .question-text {
+                font-size: 18px;
+            }
+
+            .option {
+                padding: 18px 22px;
+            }
+
+            .option:hover {
+                background: rgba(255, 255, 255, 0.08);
+                border-color: rgba(102, 126, 234, 0.5);
+                transform: translateX(5px);
+            }
+
+            .option label {
+                font-size: 16px;
+            }
+
+            /* Inline buttons on desktop */
+            .buttons-container {
+                position: static;
+                flex-direction: row;
+                justify-content: center;
+                background: none;
+                padding: 0;
+                max-width: 800px;
+                margin: 25px auto 0;
+            }
+
+            .nav-buttons {
+                flex: 1;
+            }
+
+            button {
+                width: auto;
+                min-width: 180px;
+            }
+
+            #check-btn {
+                flex-shrink: 0;
+            }
+
+            .results-container {
+                padding: 50px;
+                max-width: 600px;
+                margin: 30px auto;
+            }
+
+            .score {
+                font-size: 72px;
+            }
+
+            /* Show scrollbar on desktop */
+            ::-webkit-scrollbar {
+                display: block;
+                width: 8px;
+            }
+
+            ::-webkit-scrollbar-track {
+                background: rgba(255, 255, 255, 0.05);
+            }
+
+            ::-webkit-scrollbar-thumb {
+                background: rgba(102, 126, 234, 0.5);
+                border-radius: 4px;
+            }
+
+            ::-webkit-scrollbar-thumb:hover {
+                background: rgba(102, 126, 234, 0.7);
+            }
+
+            body {
+                -ms-overflow-style: auto;
+                scrollbar-width: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Quiz Réseaux Avancés</h1>
+        <div class="subtitle">NEEP, DNTA, IPEX - 100 questions</div>
+    </header>
+
+    <div class="quiz-info">
+        <p><strong>Instructions :</strong> Sélectionnez la ou les bonnes réponses pour chaque question. Certaines
+            questions acceptent plusieurs réponses (indiqué dans le texte). Cliquez sur "Vérifier" pour voir
+            l'explication, puis "Question suivante" pour continuer. À la fin, vous obtiendrez votre score.</p>
+        <p><strong>Thèmes :</strong> <span class="theme-badge neep-badge">NEEP</span> <span
+                class="theme-badge dnta-badge">DNTA</span> <span class="theme-badge ipex-badge">IPEX</span></p>
+    </div>
+
+    <div class="question-counter">Question <span id="current-question">1</span> sur 100</div>
+    <div class="progress-bar">
+        <div class="progress" id="quiz-progress"></div>
+    </div>
+
+    <div id="quiz-container">
+        <!-- Les questions seront injectées ici par JavaScript -->
+    </div>
+
+    <div class="buttons-container">
+        <button id="check-btn">✓ Vérifier</button>
+        <div class="nav-buttons">
+            <button id="prev-btn" disabled>← Précédente</button>
+            <button id="next-btn">Suivante →</button>
+        </div>
+    </div>
+
+    <div class="results-container" id="results-container">
+        <h2>Quiz Terminé !</h2>
+        <div class="score" id="final-score">0/100</div>
+        <div class="score-text" id="score-text"></div>
+        <button class="restart-btn" id="restart-btn">Recommencer le quiz</button>
+    </div>
+
+    <script>
+        // Données du quiz - 100 questions basées sur les documents de cours
+        const quizData = [
+            {
+                id: 1,
+                theme: "NEEP",
+                question: "Quel est le modèle de référence historique pour les communications réseau, développé par l'ISO dans les années 1980 ?",
+                options: [
+                    "Modèle TCP/IP",
+                    "Modèle OSI (Open Systems Interconnection)",
+                    "Modèle Ethernet",
+                    "Modèle Internet"
+                ],
+                correctAnswers: [1],
+                explanation: "Le modèle OSI (Open Systems Interconnection) est le modèle de référence historique développé par l'ISO dans les années 1980. Il comporte 7 couches : Physique, Liaison de données, Réseau, Transport, Session, Présentation, Application."
+            },
+            {
+                id: 2,
+                theme: "NEEP",
+                question: "Quelle évolution majeure du modèle de réseau est observée vers 1993 selon le cours ?",
+                options: [
+                    "Modèle IP-centrique",
+                    "Modèle TCP-centrique",
+                    "Modèle Ethernet-centrique",
+                    "Modèle à commutation de paquets"
+                ],
+                correctAnswers: [0],
+                explanation: "Vers 1993, on observe l'émergence du modèle IP-centrique, où IP devient le protocole de réseau dominant, avec TCP et UDP au niveau transport."
+            },
+            {
+                id: 3,
+                theme: "NEEP",
+                question: "Quel débit théorique maximum le Wi-Fi 6 (802.11ax) peut-il atteindre ?",
+                options: [
+                    "1 Gbps",
+                    "3.5 Gbps",
+                    "9.6 Gbps",
+                    "10 Gbps"
+                ],
+                correctAnswers: [2],
+                explanation: "Le Wi-Fi 6 (802.11ax) peut atteindre un débit théorique maximum de 9.6 Gbps, soit près de 3 fois plus que le Wi-Fi 5 (802.11ac)."
+            },
+            {
+                id: 4,
+                theme: "NEEP",
+                question: "Quelle est la principale amélioration attendue de la norme IEEE 802.11bn (Wi-Fi 8) prévue pour 2028 ?",
+                options: [
+                    "Débit accru uniquement",
+                    "Portée étendue uniquement",
+                    "Latence réduite et coordination multi-AP",
+                    "Consommation énergétique augmentée"
+                ],
+                correctAnswers: [2],
+                explanation: "La norme IEEE 802.11bn (Wi-Fi 8) vise principalement à réduire la latence, améliorer la coordination entre points d'accès multiples, et optimiser le handover/roaming pour des applications temps réel."
+            },
+            {
+                id: 5,
+                theme: "NEEP",
+                question: "Quel groupe IEEE 802.11 travaille sur la détection environnementale (environmental sensing) ?",
+                options: [
+                    "802.11bf",
+                    "802.11bp",
+                    "802.11be",
+                    "802.11bn"
+                ],
+                correctAnswers: [0],
+                explanation: "Le groupe IEEE 802.11bf travaille sur la détection environnementale (WLAN Sensing), permettant aux réseaux Wi-Fi de détecter les mouvements, le nombre de personnes, etc."
+            },
+            {
+                id: 6,
+                theme: "NEEP",
+                question: "La technologie LiFi (802.11bb) utilise quel type d'onde pour transmettre des données ?",
+                options: [
+                    "Ondes radio",
+                    "Ondes lumineuses (visibles ou infrarouges)",
+                    "Ondes sonores",
+                    "Ondes millimétriques"
+                ],
+                correctAnswers: [1],
+                explanation: "Le LiFi (Light Fidelity) utilise des ondes lumineuses (spectre visible ou infrarouge) au lieu des ondes radio pour transmettre des données, offrant des débits élevés et une sécurité améliorée (confinement par les murs)."
+            },
+            {
+                id: 7,
+                theme: "NEEP",
+                question: "Quel est l'avantage principal des réseaux SD-WAN (Software-Defined WAN) ?",
+                options: [
+                    "Ils augmentent la complexité de gestion",
+                    "Ils optimisent les coûts en utilisant plusieurs types de connexions",
+                    "Ils nécessitent des routeurs plus coûteux",
+                    "Ils réduisent la bande passante disponible"
+                ],
+                correctAnswers: [1],
+                explanation: "Les SD-WAN optimisent les coûts en permettant d'utiliser intelligemment plusieurs types de connexions (MPLS, Internet, 4G/5G) selon les besoins applicatifs, avec une gestion centralisée."
+            },
+            {
+                id: 8,
+                theme: "NEEP",
+                question: "Quelle API réseau standard permet de développer des applications utilisant TCP/UDP/IP ?",
+                options: [
+                    "REST API",
+                    "gRPC",
+                    "Sockets API",
+                    "GraphQL"
+                ],
+                correctAnswers: [2],
+                explanation: "L'API Sockets (BSD Sockets) est l'API réseau standard de facto permettant de développer des applications ou protocoles utilisant TCP, UDP ou directement IP. Elle représente une connexion réseau comme un descripteur de fichier."
+            },
+            {
+                id: 9,
+                theme: "NEEP",
+                question: "Quelle séquence d'appels à l'API Sockets est correcte pour un serveur TCP ?",
+                options: [
+                    "socket(), bind(), listen(), accept()",
+                    "socket(), connect(), listen(), accept()",
+                    "bind(), socket(), listen(), accept()",
+                    "socket(), listen(), bind(), accept()"
+                ],
+                correctAnswers: [0],
+                explanation: "Pour un serveur TCP, la séquence correcte est : socket() pour créer le socket, bind() pour l'associer à une adresse/port, listen() pour écouter les connexions entrantes, puis accept() pour accepter une connexion."
+            },
+            {
+                id: 10,
+                theme: "NEEP",
+                question: "Quel protocole permet de faire circuler IPv6 sur des liens contraints (low-power) pour l'IoT ?",
+                options: [
+                    "6LoWPAN (IPv6 over Low-Power Wireless Personal Area Networks)",
+                    "MPTCP",
+                    "QUIC",
+                    "CoAP"
+                ],
+                correctAnswers: [0],
+                explanation: "6LoWPAN (IPv6 over Low-Power Wireless Personal Area Networks) permet l'utilisation d'IPv6 sur des réseaux à faible consommation d'énergie comme 802.15.4, essentiel pour l'IoT."
+            },
+            {
+                id: 11,
+                theme: "NEEP",
+                question: "Quel est l'avantage principal de MPTCP (Multipath TCP) ?",
+                options: [
+                    "Il remplace complètement TCP",
+                    "Il permet d'utiliser simultanément plusieurs chemins réseau pour une même connexion",
+                    "Il réduit la sécurité des connexions",
+                    "Il élimine le besoin d'IP"
+                ],
+                correctAnswers: [1],
+                explanation: "MPTCP permet d'utiliser simultanément plusieurs chemins réseau (via différentes interfaces ou adresses IP) pour une même connexion TCP, améliorant la robustesse et le débit."
+            },
+            {
+                id: 12,
+                theme: "NEEP",
+                question: "QUIC (Quick UDP Internet Connections) a été initialement développé par :",
+                options: [
+                    "Microsoft",
+                    "Google",
+                    "Apple",
+                    "IETF"
+                ],
+                correctAnswers: [1],
+                explanation: "QUIC a été initialement développé par Google comme un protocole de transport basé sur UDP, réduisant la latence de connexion et améliorant la sécurité, devenant la base de HTTP/3."
+            },
+            {
+                id: 13,
+                theme: "NEEP",
+                question: "Quel avantage offre QUIC par rapport à TCP+TLS ?",
+                options: [
+                    "Il est plus lent à établir une connexion",
+                    "Il permet une connexion 0-RTT avec reprise de session",
+                    "Il n'offre pas de chiffrement",
+                    "Il ne fonctionne qu'en IPv4"
+                ],
+                correctAnswers: [1],
+                explanation: "QUIC permet une connexion 0-RTT (zero round-trip time) pour la reprise de session, réduisant significativement la latence par rapport à TCP+TLS qui nécessite plusieurs allers-retours."
+            },
+            {
+                id: 14,
+                theme: "NEEP",
+                question: "MQTT (Message Queuing Telemetry Transport) utilise quel modèle de communication ?",
+                options: [
+                    "Client-Serveur classique",
+                    "Publish-Subscribe (Pub/Sub)",
+                    "Peer-to-Peer",
+                    "Broadcast"
+                ],
+                correctAnswers: [1],
+                explanation: "MQTT utilise un modèle Publish-Subscribe avec un broker central. Les publishers envoient des messages à des topics, et les subscribers reçoivent les messages des topics auxquels ils sont abonnés."
+            },
+            {
+                id: 15,
+                theme: "NEEP",
+                question: "Quelle est la différence fondamentale entre MQTT et CoAP ?",
+                options: [
+                    "MQTT utilise UDP, CoAP utilise TCP",
+                    "MQTT est synchrone, CoAP est asynchrone",
+                    "MQTT utilise le modèle Pub/Sub, CoAP utilise le modèle requête/réponse RESTful",
+                    "MQTT est seulement pour l'IoT, CoAP est généraliste"
+                ],
+                correctAnswers: [2],
+                explanation: "La différence fondamentale est que MQTT utilise un modèle Publish-Subscribe avec un broker, tandis que CoAP suit un modèle requête/réponse RESTful (similaire à HTTP) pour les appareils contraints."
+            },
+            {
+                id: 16,
+                theme: "NEEP",
+                question: "Quel type de réseau sans fil est le plus adapté aux appareils IoT nécessitant une longue portée et une faible consommation d'énergie ?",
+                options: [
+                    "Wi-Fi (802.11)",
+                    "Bluetooth",
+                    "LPWAN (Low-Power Wide Area Network) comme LoRaWAN",
+                    "Zigbee"
+                ],
+                correctAnswers: [2],
+                explanation: "Les LPWAN (Low-Power Wide Area Networks) comme LoRaWAN, Sigfox ou NB-IoT sont conçus pour les appareils IoT nécessitant une longue portée (kilomètres) et une très faible consommation d'énergie, au détriment du débit."
+            },
+            {
+                id: 17,
+                theme: "NEEP",
+                question: "Dans le contexte des réseaux quantiques, qu'est-ce qu'un qubit ?",
+                options: [
+                    "Un bit classique avec une valeur 0 ou 1",
+                    "L'unité de base de l'information quantique, pouvant être dans un état de superposition",
+                    "Un octet quantique",
+                    "Une unité de mesure de la qualité quantique"
+                ],
+                correctAnswers: [1],
+                explanation: "Un qubit (quantum bit) est l'unité de base de l'information quantique. Contrairement à un bit classique (0 ou 1), un qubit peut être dans un état de superposition (à la fois 0 et 1) jusqu'à sa mesure."
+            },
+            {
+                id: 18,
+                theme: "NEEP",
+                question: "Quel principe de la mécanique quantique est utilisé pour la téléportation quantique dans les réseaux quantiques ?",
+                options: [
+                    "Le principe d'incertitude",
+                    "La superposition quantique",
+                    "L'intrication quantique",
+                    "L'effet tunnel"
+                ],
+                correctAnswers: [2],
+                explanation: "L'intrication quantique (quantum entanglement) est le phénomène où deux particules (qubits) deviennent corrélées de sorte que l'état de l'une influence instantanément l'état de l'autre, quelle que soit la distance. C'est la base de la téléportation quantique."
+            },
+            {
+                id: 19,
+                theme: "NEEP",
+                question: "Quelle technologie permet la communication sécurisée par distribution quantique de clés (QKD) ?",
+                options: [
+                    "Les réseaux quantiques",
+                    "Le Wi-Fi 6",
+                    "La 5G",
+                    "Le LiFi"
+                ],
+                correctAnswers: [0],
+                explanation: "Les réseaux quantiques permettent la distribution quantique de clés (QKD - Quantum Key Distribution), une méthode de chiffrement théoriquement inviolable basée sur les principes de la mécanique quantique."
+            },
+            {
+                id: 20,
+                theme: "NEEP",
+                question: "Quel est le principal défi pour les réseaux quantiques à longue distance ?",
+                options: [
+                    "Le coût des équipements",
+                    "La nécessité de répéteurs quantiques",
+                    "La compatibilité avec IPv4",
+                    "La consommation d'énergie"
+                ],
+                correctAnswers: [1],
+                explanation: "Le principal défi pour les réseaux quantiques à longue distance est la nécessité de répéteurs quantiques, car l'intrication quantique ne peut être maintenue sur de longues distances sans régénération, contrairement aux signaux classiques."
+            },
+            {
+                id: 21,
+                theme: "DNTA",
+                question: "Dans le contexte des datacenters, quel type de trafic domine généralement (est-ouest vs nord-sud) ?",
+                options: [
+                    "Trafic nord-sud (entre datacenter et extérieur)",
+                    "Trafic est-ouest (entre serveurs à l'intérieur du datacenter)",
+                    "Les deux sont équivalents",
+                    "Seul le trafic nord-sud existe"
+                ],
+                correctAnswers: [1],
+                explanation: "Dans les datacenters modernes, le trafic est-ouest (communication entre serveurs, virtualisation, stockage) domine largement le trafic nord-sud (entrée/sortie du datacenter), pouvant atteindre 70-80% du total."
+            },
+            {
+                id: 22,
+                theme: "DNTA",
+                question: "Quelle architecture réseau de datacenter utilise des switches feuilles (leaf) connectés à des switches épine (spine) ?",
+                options: [
+                    "Architecture three-tier (accès-agrégation-coeur)",
+                    "Architecture leaf-spine",
+                    "Architecture en anneau",
+                    "Architecture en étoile"
+                ],
+                correctAnswers: [1],
+                explanation: "L'architecture leaf-spine (feuille-épine) est une topologie Clos non bloquante où chaque switch leaf est connecté à chaque switch spine, offrant une latence faible et prévisible, et une bonne extensibilité."
+            },
+            {
+                id: 23,
+                theme: "DNTA",
+                question: "Quel est l'avantage principal du RAID 5 par rapport au RAID 1 ?",
+                options: [
+                    "Meilleure performance en lecture",
+                    "Moindre coût de stockage pour une redondance donnée",
+                    "Pas besoin de parité",
+                    "Recouvrement plus rapide après panne"
+                ],
+                correctAnswers: [1],
+                explanation: "Le RAID 5 utilise de la parité répartie sur tous les disques, offrant une redondance avec un surcoût d'un seul disque (N-1 capacité utile pour N disques), donc plus économique que le RAID 1 (miroir) qui a un surcoût de 100%."
+            },
+            {
+                id: 24,
+                theme: "DNTA",
+                question: "Quelle technologie de stockage permet à plusieurs serveurs d'accéder simultanément à des systèmes de fichiers sur le réseau ?",
+                options: [
+                    "DAS (Direct Attached Storage)",
+                    "NAS (Network Attached Storage)",
+                    "SAN (Storage Area Network)",
+                    "RAID"
+                ],
+                correctAnswers: [1],
+                explanation: "Le NAS (Network Attached Storage) fournit un accès au niveau fichier sur le réseau (généralement via NFS ou SMB/CIFS), permettant à plusieurs serveurs/clients de partager des fichiers."
+            },
+            {
+                id: 25,
+                theme: "DNTA",
+                question: "Quelle technologie de stockage fournit un accès au niveau bloc sur un réseau dédié ?",
+                options: [
+                    "DAS (Direct Attached Storage)",
+                    "NAS (Network Attached Storage)",
+                    "SAN (Storage Area Network)",
+                    "Cloud Storage"
+                ],
+                correctAnswers: [2],
+                explanation: "Le SAN (Storage Area Network) fournit un accès au niveau bloc (comme un disque local) sur un réseau dédié, généralement Fibre Channel ou iSCSI, permettant un partage de stockage haute performance."
+            },
+            {
+                id: 26,
+                theme: "DNTA",
+                question: "Quelle est la technologie traditionnelle dominante pour les SAN ?",
+                options: [
+                    "Ethernet",
+                    "InfiniBand",
+                    "Fibre Channel",
+                    "Wi-Fi"
+                ],
+                correctAnswers: [2],
+                explanation: "Le Fibre Channel est la technologie traditionnelle dominante pour les SAN, offrant des performances élevées, une faible latence et une perte de paquets quasi-nulle sur un réseau dédié."
+            },
+            {
+                id: 27,
+                theme: "DNTA",
+                question: "Quelle est la différence entre FCoE (Fibre Channel over Ethernet) et FCIP (Fibre Channel over IP) ?",
+                options: [
+                    "FCoE encapsule FC dans Ethernet, FCIP encapsule FC dans IP",
+                    "FCoE est pour les WAN, FCIP pour les LAN",
+                    "FCoE utilise TCP, FCIP utilise UDP",
+                    "Il n'y a pas de différence"
+                ],
+                correctAnswers: [0],
+                explanation: "FCoE (Fibre Channel over Ethernet) encapsule les trames Fibre Channel dans des trames Ethernet pour convergence réseau, tandis que FCIP (Fibre Channel over IP) encapsule FC dans TCP/IP pour étendre les SAN sur de longues distances."
+            },
+            {
+                id: 28,
+                theme: "DNTA",
+                question: "Quelle technologie offre la latence la plus faible pour les interconnexions HPC (High Performance Computing) ?",
+                options: [
+                    "Ethernet 100GbE",
+                    "Fibre Channel 32G",
+                    "InfiniBand HDR",
+                    "iSCSI 25GbE"
+                ],
+                correctAnswers: [2],
+                explanation: "InfiniBand, particulièrement dans ses versions récentes (HDR, NDR), offre la latence la plus faible (inférieure à 1 microseconde) et des débits très élevés, ce qui en fait le choix privilégié pour le HPC et les clusters."
+            },
+            {
+                id: 29,
+                theme: "DNTA",
+                question: "Que signifie RTO dans le contexte de la reprise après sinistre ?",
+                options: [
+                    "Recovery Time Objective - Temps maximal acceptable pour restaurer le service",
+                    "Recovery Point Objective - Perte de données maximale acceptable",
+                    "Return To Operation - Retour à l'opération normale",
+                    "Ready To Operate - Prêt à fonctionner"
+                ],
+                correctAnswers: [0],
+                explanation: "RTO (Recovery Time Objective) est le temps maximal acceptable entre l'incident et la restauration du service. Un RTO faible nécessite des solutions plus coûteuses comme la réplication synchrone et des systèmes en standby."
+            },
+            {
+                id: 30,
+                theme: "DNTA",
+                question: "Que signifie RPO dans le contexte de la reprise après sinistre ?",
+                options: [
+                    "Recovery Time Objective - Temps maximal acceptable pour restaurer le service",
+                    "Recovery Point Objective - Perte de données maximale acceptable",
+                    "Return To Operation - Retour à l'opération normale",
+                    "Ready To Operate - Prêt à fonctionner"
+                ],
+                correctAnswers: [1],
+                explanation: "RPO (Recovery Point Objective) est la perte de données maximale acceptable, mesurée dans le temps. Un RPO de 0 signifie aucune perte de données (réplication synchrone), tandis qu'un RPO de plusieurs heures permet des sauvegardes périodiques."
+            },
+            {
+                id: 31,
+                theme: "DNTA",
+                question: "Quel type de réplication garantit un RPO de 0 (zéro perte de données) ?",
+                options: [
+                    "Réplication asynchrone",
+                    "Réplication synchrone",
+                    "Sauvegarde incrémentielle",
+                    "Snapshot horaire"
+                ],
+                correctAnswers: [1],
+                explanation: "La réplication synchrone garantit un RPO de 0 (zéro perte de données) car chaque écriture est confirmée seulement après avoir été écrite sur les deux sites (primaire et secondaire)."
+            },
+            {
+                id: 32,
+                theme: "DNTA",
+                question: "Quelle est la principale limitation de la réplication synchrone ?",
+                options: [
+                    "Coût élevé",
+                    "Impact sur les performances due à la latence",
+                    "Distance limitée (généralement < 100 km)",
+                    "Les deux dernières réponses"
+                ],
+                correctAnswers: [3],
+                explanation: "La réplication synchrone a deux limitations principales : 1) impact sur les performances car chaque écriture attend l'acquittement du site distant, 2) distance limitée (généralement < 100 km) due à la latence."
+            },
+            {
+                id: 33,
+                theme: "DNTA",
+                question: "Quel protocole permet de transporter SCSI sur TCP/IP pour créer des SAN IP ?",
+                options: [
+                    "FCIP",
+                    "iFCP",
+                    "iSCSI",
+                    "FCoE"
+                ],
+                correctAnswers: [2],
+                explanation: "iSCSI (Internet SCSI) encapsule les commandes SCSI dans TCP/IP, permettant de créer des SAN sur des réseaux IP standard, offrant une alternative économique au Fibre Channel."
+            },
+            {
+                id: 34,
+                theme: "DNTA",
+                question: "Quelle technologie permet l'accès direct à la mémoire distante (Remote Direct Memory Access) sur Ethernet ?",
+                options: [
+                    "RoCE (RDMA over Converged Ethernet)",
+                    "iSCSI",
+                    "FCoE",
+                    "FCIP"
+                ],
+                correctAnswers: [0],
+                explanation: "RoCE (RDMA over Converged Ethernet) permet le RDMA (Remote Direct Memory Access) sur des réseaux Ethernet, réduisant la latence et la charge CPU en permettant à un hôte d'accéder directement à la mémoire d'un autre hôte sans impliquer les systèmes d'exploitation."
+            },
+            {
+                id: 35,
+                theme: "IPEX",
+                question: "Dans Mobile IPv4, comment s'appelle l'adresse temporaire assignée à un Mobile Node (MN) lorsqu'il est sur un Foreign Network (FN) ?",
+                options: [
+                    "Home Address",
+                    "Care-of Address (CoA)",
+                    "Foreign Agent Address",
+                    "Temporary IP"
+                ],
+                correctAnswers: [1],
+                explanation: "La Care-of Address (CoA) est l'adresse temporaire assignée à un Mobile Node lorsqu'il est attaché à un Foreign Network. Elle représente l'emplacement actuel du MN pour l'acheminement des paquets."
+            },
+            {
+                id: 36,
+                theme: "IPEX",
+                question: "Quel est le problème principal du routage dans Mobile IPv4 dit 'triangular routing' ?",
+                options: [
+                    "Il est trop sécurisé",
+                    "Il utilise des chemins non optimaux (les paquets passent toujours par le Home Agent)",
+                    "Il ne fonctionne qu'en IPv6",
+                    "Il nécessite trop de bande passante"
+                ],
+                correctAnswers: [1],
+                explanation: "Le triangular routing (routage triangulaire) est un problème de Mobile IPv4 où les paquets du Correspondent Node (CN) vers le Mobile Node (MN) passent toujours par le Home Agent (HA), même si CN et MN sont proches, créant un chemin non optimal."
+            },
+            {
+                id: 37,
+                theme: "IPEX",
+                question: "Quelle amélioration Mobile IPv6 apporte-t-il par rapport à Mobile IPv4 ?",
+                options: [
+                    "Élimination du triangular routing grâce à l'optimisation de route",
+                    "Utilisation exclusive d'UDP",
+                    "Suppression du besoin de Foreign Agent",
+                    "Les réponses 1 et 3"
+                ],
+                correctAnswers: [3],
+                explanation: "Mobile IPv6 améliore Mobile IPv4 en : 1) éliminant le triangular routing grâce à l'optimisation de route (Route Optimization) permettant une communication directe entre CN et MN, et 2) supprimant le besoin de Foreign Agent grâce aux capacités d'autoconfiguration d'IPv6."
+            },
+            {
+                id: 38,
+                theme: "IPEX",
+                question: "Quel champ de l'en-tête IPv4 est utilisé pour la QoS DiffServ ?",
+                options: [
+                    "Champ TOS (Type of Service) maintenant DS (Differentiated Services)",
+                    "Champ TTL (Time To Live)",
+                    "Champ Identification",
+                    "Champ Flags"
+                ],
+                correctAnswers: [0],
+                explanation: "Le champ TOS (Type of Service) de l'en-tête IPv4, renommé DS (Differentiated Services) field dans DiffServ, est utilisé pour la QoS. Les 6 premiers bits forment le DSCP (DiffServ Code Point) indiquant le traitement à appliquer."
+            },
+            {
+                id: 39,
+                theme: "IPEX",
+                question: "Quelle est la principale différence entre IntServ et DiffServ pour la QoS IP ?",
+                options: [
+                    "IntServ est basé sur la réservation de ressources par flux, DiffServ sur des classes de trafic",
+                    "IntServ ne nécessite pas de signalisation, DiffServ en nécessite",
+                    "IntServ est plus simple à déployer à grande échelle",
+                    "DiffServ garantit des paramètres stricts de bout en bout"
+                ],
+                correctAnswers: [0],
+                explanation: "IntServ (Integrated Services) réserve des ressources pour chaque flux individuel (avec RSVP), tandis que DiffServ (Differentiated Services) classe le trafic en agrégats (classes) et applique un traitement par saut (Per-Hop Behavior). DiffServ est plus scalable mais offre moins de garanties."
+            },
+            {
+                id: 40,
+                theme: "IPEX",
+                question: "Quel protocole de signalisation est utilisé par IntServ pour réserver des ressources ?",
+                options: [
+                    "BGP",
+                    "RSVP (Resource Reservation Protocol)",
+                    "LDP (Label Distribution Protocol)",
+                    "OSPF"
+                ],
+                correctAnswers: [1],
+                explanation: "RSVP (Resource Reservation Protocol) est le protocole de signalisation utilisé par IntServ pour réserver des ressources le long d'un chemin pour un flux spécifique, garantissant une QoS de bout en bout."
+            },
+            {
+                id: 41,
+                theme: "IPEX",
+                question: "Quelle valeur DSCP correspond au PHB EF (Expedited Forwarding) pour le traitement prioritaire ?",
+                options: [
+                    "000000 (Best Effort)",
+                    "101110 (EF)",
+                    "001010 (AF11)",
+                    "011000 (CS3)"
+                ],
+                correctAnswers: [1],
+                explanation: "Le PHB EF (Expedited Forwarding) pour le traitement prioritaire (faible latence, faible gigue) correspond au DSCP 101110 (46 en décimal), souvent utilisé pour la voix sur IP ou les circuits virtuels."
+            },
+            {
+                id: 42,
+                theme: "IPEX",
+                question: "Quel mécanisme de gestion de file d'attente utilise une probabilité croissante de rejet de paquets lorsque la file se remplit ?",
+                options: [
+                    "FIFO (First In First Out)",
+                    "RED (Random Early Detection)",
+                    "Priority Queuing",
+                    "Weighted Fair Queuing"
+                ],
+                correctAnswers: [1],
+                explanation: "RED (Random Early Detection) commence à rejeter (ou marquer) aléatoirement des paquets lorsque le niveau de remplissage de la file dépasse un seuil, évitant la synchronisation globale des flux TCP et les congestions brutales."
+            },
+            {
+                id: 43,
+                theme: "IPEX",
+                question: "Quel type de VPN crée un tunnel au niveau réseau (couche 3) ?",
+                options: [
+                    "L2VPN",
+                    "L3VPN",
+                    "L4VPN",
+                    "L7VPN"
+                ],
+                correctAnswers: [1],
+                explanation: "Un L3VPN (Layer 3 VPN) crée un tunnel au niveau réseau (couche 3), transportant des paquets IP. Les exemples incluent IPSec, GRE, et les VPN MPLS de niveau 3."
+            },
+            {
+                id: 44,
+                theme: "IPEX",
+                question: "Quel protocole de tunneling générique encapsule divers protocoles dans IP ?",
+                options: [
+                    "IPSec",
+                    "GRE (Generic Routing Encapsulation)",
+                    "L2TP",
+                    "PPTP"
+                ],
+                correctAnswers: [1],
+                explanation: "GRE (Generic Routing Encapsulation) est un protocole de tunneling générique qui peut encapsuler une large variété de protocoles (IP, IPX, AppleTalk, etc.) dans des paquets IP, identifié par le protocole IP 47."
+            },
+            {
+                id: 45,
+                theme: "IPEX",
+                question: "Quelle est la principale différence entre IPSec en mode transport et en mode tunnel ?",
+                options: [
+                    "Le mode transport chiffre seulement la charge utile, le mode tunnel chiffre l'en-tête IP original aussi",
+                    "Le mode tunnel est seulement pour IPv6",
+                    "Le mode transport est plus sécurisé",
+                    "Il n'y a pas de différence"
+                ],
+                correctAnswers: [0],
+                explanation: "En mode transport, IPSec protège seulement la charge utile (données) du paquet IP ; l'en-tête IP original reste visible. En mode tunnel, IPSec protège l'ensemble du paquet IP original (en-tête et données) en l'encapsulant dans un nouveau paquet IP."
+            },
+            {
+                id: 46,
+                theme: "IPEX",
+                question: "Quel composant d'IPSec fournit la confidentialité (chiffrement) des données ?",
+                options: [
+                    "AH (Authentication Header)",
+                    "ESP (Encapsulating Security Payload)",
+                    "IKE (Internet Key Exchange)",
+                    "ISAKMP (Internet Security Association and Key Management Protocol)"
+                ],
+                correctAnswers: [1],
+                explanation: "ESP (Encapsulating Security Payload) d'IPSec fournit la confidentialité par chiffrement, ainsi que l'authentification et l'intégrité. AH (Authentication Header) fournit seulement l'authentification et l'intégrité, sans chiffrement."
+            },
+            {
+                id: 47,
+                theme: "IPEX",
+                question: "Quel protocole VPN est souvent utilisé pour l'accès à distance et encapsule PPP sur UDP ?",
+                options: [
+                    "IPSec",
+                    "GRE",
+                    "L2TP (Layer 2 Tunneling Protocol)",
+                    "VXLAN"
+                ],
+                correctAnswers: [2],
+                explanation: "L2TP (Layer 2 Tunneling Protocol) est souvent utilisé pour l'accès à distance VPN, encapsulant des trames PPP sur UDP (port 1701). Il est fréquemment combiné avec IPSec pour le chiffrement (L2TP/IPSec)."
+            },
+            {
+                id: 48,
+                theme: "IPEX",
+                question: "Quel protocole de tunneling Ethernet sur UDP est largement utilisé dans les cloud et datacenters pour l'extension de réseaux virtuels ?",
+                options: [
+                    "GRE",
+                    "VXLAN (Virtual Extensible LAN)",
+                    "IPSec",
+                    "L2TP"
+                ],
+                correctAnswers: [1],
+                explanation: "VXLAN (Virtual Extensible LAN) encapsule des trames Ethernet dans UDP (port 4789), créant des tunnels L2 sur des réseaux IP sous-jacents. Il est largement utilisé dans les clouds et datacenters pour étendre les réseaux virtuels sur plusieurs racks ou sites."
+            },
+            {
+                id: 49,
+                theme: "IPEX",
+                question: "Quelle est la principale limitation de GRE en termes de sécurité ?",
+                options: [
+                    "Il est trop lent",
+                    "Il ne fournit pas de chiffrement natif",
+                    "Il ne fonctionne qu'en IPv6",
+                    "Il nécessite des équipements spécifiques"
+                ],
+                correctAnswers: [1],
+                explanation: "GRE ne fournit pas de chiffrement natif ; il transporte les données en clair. Pour la sécurité, GRE est souvent combiné avec IPSec (GRE over IPSec) pour fournir confidentialité, authentification et intégrité."
+            },
+            {
+                id: 50,
+                theme: "IPEX",
+                question: "Quel protocole VPN moderne se veut plus simple et performant qu'IPSec, utilisant des algorithmes de chiffrement modernes comme ChaCha20 et Curve25519 ?",
+                options: [
+                    "OpenVPN",
+                    "WireGuard",
+                    "SoftEther",
+                    "SSTP"
+                ],
+                correctAnswers: [1],
+                explanation: "WireGuard est un protocole VPN moderne conçu pour être plus simple, plus performant et plus facile à auditer qu'IPSec. Il utilise des algorithmes cryptographiques modernes comme ChaCha20, Poly1305, et Curve25519, et est intégré au noyau Linux."
+            },
+            {
+                id: 51,
+                theme: "NEEP",
+                question: "Quelle norme IEEE définit la QoS au niveau de la couche liaison (L2) pour Ethernet ?",
+                options: [
+                    "802.1D (Spanning Tree)",
+                    "802.1Q (VLAN tagging)",
+                    "802.1p (Priority)",
+                    "802.3 (Ethernet)"
+                ],
+                correctAnswers: [2],
+                explanation: "IEEE 802.1p (intégré dans 802.1Q) définit la QoS au niveau de la couche liaison (L2) en utilisant 3 bits de priorité (0-7) dans le tag VLAN pour indiquer la priorité des trames Ethernet (Classe de Service)."
+            },
+            {
+                id: 52,
+                theme: "NEEP",
+                question: "Quelle technologie permet de virtualiser des réseaux locaux étendus sur plusieurs datacenters ?",
+                options: [
+                    "VLAN",
+                    "VXLAN",
+                    "MPLS",
+                    "Les réponses 2 et 3"
+                ],
+                correctAnswers: [3],
+                explanation: "VXLAN et MPLS (avec VPLS) permettent tous deux de virtualiser des réseaux locaux étendus sur plusieurs datacenters ou sites. VXLAN utilise l'encapsulation UDP/IP, tandis que MPLS utilise des labels pour créer des réseaux virtuels de couche 2."
+            },
+            {
+                id: 53,
+                theme: "DNTA",
+                question: "Quelle est la différence fondamentale entre un NAS et un SAN ?",
+                options: [
+                    "Le NAS fournit un accès fichier, le SAN un accès bloc",
+                    "Le SAN est moins performant",
+                    "Le NAS utilise Fibre Channel",
+                    "Le SAN est seulement pour les sauvegardes"
+                ],
+                correctAnswers: [0],
+                explanation: "La différence fondamentale est que le NAS (Network Attached Storage) fournit un accès au niveau fichier via des protocoles comme NFS ou SMB, tandis que le SAN (Storage Area Network) fournit un accès au niveau bloc, comme un disque local, via des protocoles comme Fibre Channel ou iSCSI."
+            },
+            {
+                id: 54,
+                theme: "DNTA",
+                question: "Quelle technologie permet de converger le trafic réseau et le trafic stockage sur une même infrastructure Ethernet ?",
+                options: [
+                    "FCoE (Fibre Channel over Ethernet)",
+                    "iSCSI",
+                    "FCIP",
+                    "Les réponses 1 et 2"
+                ],
+                correctAnswers: [3],
+                explanation: "FCoE et iSCSI permettent tous deux de converger le trafic réseau et stockage sur Ethernet. FCoE encapsule Fibre Channel dans Ethernet, tandis qu'iSCSI transporte SCSI sur TCP/IP sur Ethernet. FCoE nécessite généralement DCB (Data Center Bridging)."
+            },
+            {
+                id: 55,
+                theme: "IPEX",
+                question: "Quel protocole est utilisé par Mobile IP pour enregistrer la Care-of Address auprès du Home Agent ?",
+                options: [
+                    "ICMP",
+                    "UDP",
+                    "Registration Protocol (sur UDP port 434)",
+                    "TCP"
+                ],
+                correctAnswers: [2],
+                explanation: "Mobile IPv4 utilise un protocole d'enregistrement (Registration Protocol) sur UDP port 434 pour enregistrer la Care-of Address auprès du Home Agent. Le Mobile Node envoie un Registration Request au Home Agent via le Foreign Agent (ou directement)."
+            },
+            {
+                id: 56,
+                theme: "NEEP",
+                question: "Quel mécanisme de congestion avoidance dans TCP réduit dynamiquement la fenêtre de congestion après une perte de paquets ?",
+                options: [
+                    "Slow Start",
+                    "Fast Retransmit",
+                    "AIMD (Additive Increase Multiplicative Decrease)",
+                    "Fast Recovery"
+                ],
+                correctAnswers: [2],
+                explanation: "AIMD (Additive Increase Multiplicative Decrease) est le mécanisme fondamental de contrôle de congestion dans TCP : la fenêtre augmente additivement pendant les périodes sans perte, et est réduite multiplicativement (généralement de moitié) après la détection d'une perte."
+            },
+            {
+                id: 57,
+                theme: "NEEP",
+                question: "Quel est l'avantage de QUIC par rapport à TCP en termes de mobilité ?",
+                options: [
+                    "Les connexions survivent aux changements d'adresse IP",
+                    "Il est plus lent",
+                    "Il ne fonctionne qu'en Wi-Fi",
+                    "Il nécessite moins de mémoire"
+                ],
+                correctAnswers: [0],
+                explanation: "QUIC utilise des identifiants de connexion indépendants de l'adresse IP, permettant à une connexion de survivre aux changements d'adresse IP (par exemple, passage du Wi-Fi à la 4G/5G), sans nécessiter de réétablissement comme avec TCP."
+            },
+            {
+                id: 58,
+                theme: "NEEP",
+                question: "Quel protocole IoT est particulièrement adapté aux environnements contraints (faible puissance, faible bande passante) et utilise le modèle requête/réponse sur UDP ?",
+                options: [
+                    "MQTT",
+                    "AMQP",
+                    "CoAP (Constrained Application Protocol)",
+                    "HTTP/2"
+                ],
+                correctAnswers: [2],
+                explanation: "CoAP (Constrained Application Protocol) est conçu spécialement pour les environnements IoT contraints. Il utilise un modèle requête/réponse RESTful similaire à HTTP, mais sur UDP avec une taille d'en-tête réduite, supportant le multicast et la confirmation optionnelle."
+            },
+            {
+                id: 59,
+                theme: "NEEP",
+                question: "Quelle technologie permet d'étendre les VLAN sur plusieurs switches sans utiliser de tunneling ?",
+                options: [
+                    "VXLAN",
+                    "802.1Q (VLAN tagging)",
+                    "Q-in-Q (802.1ad)",
+                    "GRE"
+                ],
+                correctAnswers: [1],
+                explanation: "IEEE 802.1Q (VLAN tagging) permet d'étendre les VLAN sur plusieurs switches en ajoutant un tag de 4 octets dans la trame Ethernet. Les switches compatibles 802.1Q peuvent transporter plusieurs VLAN sur un même lien trunk."
+            },
+            {
+                id: 60,
+                theme: "NEEP",
+                question: "Quelle est la taille normale du champ DSCP dans l'en-tête IP pour DiffServ ?",
+                options: [
+                    "8 bits",
+                    "6 bits",
+                    "4 bits",
+                    "3 bits"
+                ],
+                correctAnswers: [1],
+                explanation: "Le champ DSCP (Differentiated Services Code Point) utilise les 6 premiers bits de l'ancien champ TOS de l'en-tête IPv4 (ou Traffic Class en IPv6), permettant 64 valeurs (0-63) pour indiquer le traitement DiffServ à appliquer."
+            },
+            {
+                id: 61,
+                theme: "DNTA",
+                question: "Quelle topologie de SAN utilise un seul commutateur pour connecter tous les nœuds ?",
+                options: [
+                    "Topologie en anneau",
+                    "Topologie maillée (meshed)",
+                    "Topologie à commutateur unique",
+                    "Topologie en cascade"
+                ],
+                correctAnswers: [2],
+                explanation: "La topologie à commutateur unique (single-switch fabric) est la plus simple, où tous les équipements (serveurs, stockage) sont connectés à un même commutateur Fibre Channel. Simple à gérer mais présente un point de défaillance unique et une extensibilité limitée."
+            },
+            {
+                id: 62,
+                theme: "DNTA",
+                question: "Quelle classe de service Fibre Channel offre une connexion dédiée avec contrôle de flux de bout en bout ?",
+                options: [
+                    "Classe 1",
+                    "Classe 2",
+                    "Classe 3",
+                    "Classe 4"
+                ],
+                correctAnswers: [0],
+                explanation: "La Classe 1 de Fibre Channel offre une connexion dédiée (circuit virtuel) avec contrôle de flux de bout en bout, garantissant une bande passante et une latence pour des applications comme la vidéo ou les données critiques."
+            },
+            {
+                id: 63,
+                theme: "DNTA",
+                question: "Quel protocole permet l'extension de SAN Fibre Channel sur des réseaux IP longue distance ?",
+                options: [
+                    "FCoE",
+                    "FCIP",
+                    "iSCSI",
+                    "iFCP"
+                ],
+                correctAnswers: [1],
+                explanation: "FCIP (Fibre Channel over IP) tunnel des trames Fibre Channel dans TCP/IP, permettant d'étendre un SAN sur des distances longue (WAN) via des réseaux IP existants, typiquement pour la réplication ou le backup à distance."
+            },
+            {
+                id: 64,
+                theme: "DNTA",
+                question: "Quelle technique de RAID combine mirroring et striping pour offrir à la fois redondance et performance ?",
+                options: [
+                    "RAID 0",
+                    "RAID 1",
+                    "RAID 5",
+                    "RAID 10 (1+0)"
+                ],
+                correctAnswers: [3],
+                explanation: "RAID 10 (ou 1+0) combine le mirroring (RAID 1) et le striping (RAID 0) : les données sont réparties sur plusieurs paires de disques en miroir. Cela offre à la fois redondance (tolérance aux pannes) et bonnes performances en lecture/écriture."
+            },
+            {
+                id: 65,
+                theme: "IPEX",
+                question: "Quel algorithme de gestion de file d'attente assure un partage équitable de la bande passante entre les flux ?",
+                options: [
+                    "FIFO (First In First Out)",
+                    "Priority Queuing",
+                    "Weighted Fair Queuing (WFQ)",
+                    "Custom Queuing"
+                ],
+                correctAnswers: [2],
+                explanation: "Weighted Fair Queuing (WFQ) assure un partage équitable de la bande passante entre les flux en attribuant dynamiquement des priorités. Les flux à faible volume (comme les interactions) obtiennent un service préférentiel par rapport aux flux volumineux (comme les transferts de fichiers)."
+            },
+            {
+                id: 66,
+                theme: "IPEX",
+                question: "Quelle est la fonction principale du protocole IKE (Internet Key Exchange) dans IPSec ?",
+                options: [
+                    "Chiffrement des données",
+                    "Authentification des paquets",
+                    "Négociation et établissement des Security Associations (SA)",
+                    "Fragmentation des paquets"
+                ],
+                correctAnswers: [2],
+                explanation: "IKE (Internet Key Exchange) est utilisé par IPSec pour négocier et établir automatiquement les Security Associations (SA) entre pairs, incluant l'échange de clés, l'authentification mutuelle, et la gestion de la durée de vie des SA."
+            },
+            {
+                id: 67,
+                theme: "IPEX",
+                question: "Quel type de VPN est généralement utilisé pour connecter des sites distants d'une entreprise de manière permanente ?",
+                options: [
+                    "VPN d'accès à distance (Remote Access VPN)",
+                    "VPN de site à site (Site-to-Site VPN)",
+                    "VPN clientless",
+                    "VPN SSL"
+                ],
+                correctAnswers: [1],
+                explanation: "Les VPN de site à site (Site-to-Site VPN) connectent des réseaux entiers (par exemple, des succursales) de manière permanente, généralement utilisant des routeurs ou firewalls comme terminateurs de tunnel. IPSec et MPLS sont des technologies courantes."
+            },
+            {
+                id: 68,
+                theme: "IPEX",
+                question: "Quelle technologie VPN utilise MPLS pour créer des réseaux privés virtuels de niveau 2 ?",
+                options: [
+                    "VPLS (Virtual Private LAN Service)",
+                    "IPSec VPN",
+                    "GRE",
+                    "L2TP"
+                ],
+                correctAnswers: [0],
+                explanation: "VPLS (Virtual Private LAN Service) utilise MPLS pour créer des réseaux privés virtuels de niveau 2 (Ethernet) sur une infrastructure partagée, donnant l'illusion d'un switch Ethernet unique étendu sur plusieurs sites."
+            },
+            {
+                id: 69,
+                theme: "NEEP",
+                question: "Quel est le rôle d'un broker dans l'architecture MQTT ?",
+                options: [
+                    "Il stocke les données des capteurs",
+                    "Il agit comme intermédiaire entre publishers et subscribers",
+                    "Il convertit MQTT en HTTP",
+                    "Il chiffre les messages"
+                ],
+                correctAnswers: [1],
+                explanation: "Dans MQTT, le broker (serveur) agit comme intermédiaire central entre les publishers (qui publient des messages) et les subscribers (qui s'abonnent à des topics). Il reçoit, filtre et route les messages aux subscribers appropriés."
+            },
+            {
+                id: 70,
+                theme: "NEEP",
+                question: "Quel niveau de QoS MQTT assure une livraison au plus une fois (fire and forget) ?",
+                options: [
+                    "QoS 0",
+                    "QoS 1",
+                    "QoS 2",
+                    "QoS 3"
+                ],
+                correctAnswers: [0],
+                explanation: "Le niveau QoS 0 de MQTT assure une livraison 'au plus une fois' (at most once), sans accusé de réception. C'est le mode 'fire and forget' le plus rapide mais le moins fiable, utilisé pour les données non critiques."
+            },
+            {
+                id: 71,
+                theme: "NEEP",
+                question: "Quelle technologie de réseau définit des chemins déterministes pour le trafic temps réel sur Ethernet ?",
+                options: [
+                    "Ethernet standard",
+                    "TSN (Time-Sensitive Networking)",
+                    "VLAN",
+                    "SD-WAN"
+                ],
+                correctAnswers: [1],
+                explanation: "TSN (Time-Sensitive Networking) est un ensemble de standards IEEE (802.1Qbv, etc.) qui étend Ethernet avec des fonctionnalités pour un trafic temps réel déterministe (basse latence, faible gigue), crucial pour l'industrie 4.0, l'automobile, etc."
+            },
+            {
+                id: 72,
+                theme: "NEEP",
+                question: "Quel est le principal avantage de l'Edge Computing (par rapport au Cloud centralisé) pour l'IoT ?",
+                options: [
+                    "Réduction de la latence",
+                    "Coût réduit du stockage",
+                    "Meilleure sécurité",
+                    "Les réponses 1 et 3"
+                ],
+                correctAnswers: [3],
+                explanation: "L'Edge Computing (ou Fog Computing) réduit la latence en traitant les données près de leur source (plutôt que dans le cloud distant), et peut améliorer la sécurité en gardant les données sensibles localement. Il réduit aussi la bande passante nécessaire vers le cloud."
+            },
+            {
+                id: 73,
+                theme: "DNTA",
+                question: "Quelle est la différence entre east-west et north-south traffic dans un datacenter ?",
+                options: [
+                    "East-west : entre serveurs ; north-south : entre datacenter et extérieur",
+                    "East-west : entrée/sortie ; north-south : interne",
+                    "Ils sont identiques",
+                    "East-west est plus sécurisé"
+                ],
+                correctAnswers: [0],
+                explanation: "Dans un datacenter, le trafic east-west (est-ouest) est le trafic entre serveurs à l'intérieur du datacenter (virtualisation, stockage, microservices). Le trafic north-south (nord-sud) est le trafic entrant/sortant du datacenter (vers les utilisateurs ou autres sites)."
+            },
+            {
+                id: 74,
+                theme: "DNTA",
+                question: "Quelle technologie de stockage est directement attachée à un serveur via un bus (SAS, SATA) ?",
+                options: [
+                    "NAS",
+                    "SAN",
+                    "DAS (Direct Attached Storage)",
+                    "Cloud Storage"
+                ],
+                correctAnswers: [2],
+                explanation: "Le DAS (Direct Attached Storage) est directement attaché à un serveur via un bus local (SAS, SATA, SCSI). Il offre de bonnes performances mais n'est pas partageable réseau (sauf via le serveur hôte)."
+            },
+            {
+                id: 75,
+                theme: "DNTA",
+                question: "Quel est le principal avantage d'InfiniBand par rapport à Ethernet pour le HPC ?",
+                options: [
+                    "Latence extrêmement faible",
+                    "Coût inférieur",
+                    "Compatibilité universelle",
+                    "Simplicité de gestion"
+                ],
+                correctAnswers: [0],
+                explanation: "InfiniBand offre une latence extrêmement faible (souvent < 1 µs) et un débit très élevé grâce à son architecture RDMA native, ce qui le rend supérieur à Ethernet pour les applications HPC (High Performance Computing) et les clusters nécessitant des échanges intensifs."
+            },
+            {
+                id: 76,
+                theme: "IPEX",
+                question: "Quel mécanisme de QoS utilise des 'jetons' pour contrôler le débit et autoriser des rafales (bursts) ?",
+                options: [
+                    "Leaky Bucket",
+                    "Token Bucket",
+                    "RED",
+                    "WFQ"
+                ],
+                correctAnswers: [1],
+                explanation: "Le Token Bucket permet à un trafic de dépasser temporairement le débit moyen (en utilisant des jetons accumulés) pour des rafales (bursts), tout en garantissant un débit moyen à long terme. Plus flexible que le Leaky Bucket qui impose un débit constant."
+            },
+            {
+                id: 77,
+                theme: "IPEX",
+                question: "Quel mode IPSec est typiquement utilisé pour les VPN site à site entre routeurs ?",
+                options: [
+                    "Mode transport",
+                    "Mode tunnel",
+                    "Les deux peuvent être utilisés",
+                    "Aucun des deux"
+                ],
+                correctAnswers: [1],
+                explanation: "Le mode tunnel IPSec est typiquement utilisé pour les VPN site à site entre routeurs (ou gateways), car il protège l'intégralité du paquet IP original (en-tête et charge utile) en l'encapsulant dans un nouveau paquet IP."
+            },
+            {
+                id: 78,
+                theme: "IPEX",
+                question: "Quel protocole de tunneling supporte le multiprotocole (IP, IPX, AppleTalk) et est défini dans les RFC 1701 et 2784 ?",
+                options: [
+                    "L2TP",
+                    "PPTP",
+                    "GRE",
+                    "IPSec"
+                ],
+                correctAnswers: [2],
+                explanation: "GRE (Generic Routing Encapsulation), défini dans les RFC 1701 et 2784, est un protocole de tunneling générique qui peut encapsuler divers protocoles de couche réseau (IP, IPX, AppleTalk) dans des paquets IP."
+            },
+            {
+                id: 79,
+                theme: "NEEP",
+                question: "Quel est le principal inconvénient de Mobile IPv4 ?",
+                options: [
+                    "Il ne fonctionne qu'en IPv6",
+                    "Le triangular routing inefficace",
+                    "Il nécessite des modifications sur tous les routeurs Internet",
+                    "Il ne supporte pas le handover"
+                ],
+                correctAnswers: [1],
+                explanation: "Le principal inconvénient de Mobile IPv4 est le triangular routing inefficace : les paquets du Correspondent Node vers le Mobile Node doivent toujours passer par le Home Agent, même si les deux sont proches, créant un chemin sous-optimal."
+            },
+            {
+                id: 80,
+                theme: "NEEP",
+                question: "Quel protocole de transport est utilisé par QUIC ?",
+                options: [
+                    "TCP",
+                    "UDP",
+                    "SCTP",
+                    "Un nouveau protocole de niveau 3"
+                ],
+                correctAnswers: [1],
+                explanation: "QUIC (Quick UDP Internet Connections) est construit sur UDP. Il implémente ses propres mécanismes de fiabilité, contrôle de congestion et sécurité au-dessus d'UDP, ce qui lui permet d'éviter les limitations de TCP et d'être déployé plus facilement (UDP étant largement autorisé)."
+            },
+            {
+                id: 81,
+                theme: "DNTA",
+                question: "Quelle est la principale caractéristique d'un réseau leaf-spine ?",
+                options: [
+                    "Topologie hiérarchique à trois niveaux",
+                    "Tous les leafs sont connectés à tous les spines (full mesh partiel)",
+                    "Seuls les spines communiquent entre eux",
+                    "Les leafs sont organisés en anneau"
+                ],
+                correctAnswers: [1],
+                explanation: "Dans une topologie leaf-spine, chaque switch leaf (accès) est connecté à chaque switch spine (agrégation) créant un full mesh partiel. Cela garantit un nombre constant de sauts entre n'importe quels deux leafs (2 sauts) et une bande passante égale entre tous les liens."
+            },
+            {
+                id: 82,
+                theme: "DNTA",
+                question: "Quel RAID n'offre aucune redondance mais améliore les performances par striping ?",
+                options: [
+                    "RAID 0",
+                    "RAID 1",
+                    "RAID 5",
+                    "RAID 6"
+                ],
+                correctAnswers: [0],
+                explanation: "RAID 0 (striping) répartit les données sur plusieurs disques sans redondance, améliorant les performances en lecture/écriture, mais offrant aucune tolérance aux pannes : la panne d'un seul disque entraîne la perte de toutes les données."
+            },
+            {
+                id: 83,
+                theme: "DNTA",
+                question: "Quelle technologie permet de virtualiser l'adressage SCSI pour créer des pools de stockage ?",
+                options: [
+                    "LUN (Logical Unit Number)",
+                    "WWPN (World Wide Port Name)",
+                    "VSAN (Virtual SAN)",
+                    "Zoning"
+                ],
+                correctAnswers: [0],
+                explanation: "Une LUN (Logical Unit Number) est un identifiant logique utilisé pour adresser une unité de stockage logique (comme un volume) dans un système SCSI. La virtualisation de LUNs permet de créer des pools de stockage flexibles à partir de disques physiques."
+            },
+            {
+                id: 84,
+                theme: "IPEX",
+                question: "Quel est le rôle du champ 'Flow Label' dans l'en-tête IPv6 ?",
+                options: [
+                    "Identifier les paquets d'un même flux pour un traitement spécialisé (QoS)",
+                    "Contrôler la fragmentation",
+                    "Définir la classe de trafic",
+                    "Authentifier le paquet"
+                ],
+                correctAnswers: [0],
+                explanation: "Le champ Flow Label (20 bits) dans l'en-tête IPv6 permet d'identifier les paquets appartenant à un même flux (séquence de paquets d'une source à une destination) pour permettre aux routeurs de leur appliquer un traitement spécialisé (QoS, chemin spécifique)."
+            },
+            {
+                id: 85,
+                theme: "IPEX",
+                question: "Quelle technique de sécurité VPN utilise le mode 'tunnel' d'IPSec avec ESP pour chiffrer et authentifier l'intégralité du paquet IP original ?",
+                options: [
+                    "Transport mode avec AH",
+                    "Tunnel mode avec ESP",
+                    "Transport mode avec ESP",
+                    "Tunnel mode avec AH seulement"
+                ],
+                correctAnswers: [1],
+                explanation: "Le mode tunnel d'IPSec avec ESP (Encapsulating Security Payload) chiffre et authentifie l'intégralité du paquet IP original (en-tête et données) en l'encapsulant dans un nouveau paquet IP. C'est le mode typique pour les VPN site à site."
+            },
+            {
+                id: 86,
+                theme: "NEEP",
+                question: "Quelle est la fréquence approximative de la bande des 5 GHz utilisée par le Wi-Fi ?",
+                options: [
+                    "2.4 GHz seulement",
+                    "5.0-5.8 GHz",
+                    "60 GHz",
+                    "900 MHz"
+                ],
+                correctAnswers: [1],
+                explanation: "Le Wi-Fi dans la bande 5 GHz utilise généralement les fréquences de 5.150 à 5.825 GHz (selon les canaux et régulations). Cette bande offre plus de canaux non chevauchants et moins d'interférences que le 2.4 GHz, mais une portée légèrement réduite."
+            },
+            {
+                id: 87,
+                theme: "NEEP",
+                question: "Quelle est la principale caractéristique du Wi-Fi 6E ?",
+                options: [
+                    "Utilisation de la bande 6 GHz",
+                    "Débit réduit pour une meilleure portée",
+                    "Suppression du chiffrement",
+                    "Utilisation exclusive du 2.4 GHz"
+                ],
+                correctAnswers: [0],
+                explanation: "Le Wi-Fi 6E (extension du Wi-Fi 6) ajoute l'utilisation de la bande 6 GHz (5.925-7.125 GHz), offrant encore plus de spectre pour des canaux larges (160 MHz) et non encombrés, réduisant les interférences et augmentant la capacité."
+            },
+            {
+                id: 88,
+                theme: "DNTA",
+                question: "Quelle méthode de réplication est généralement utilisée pour des distances supérieures à 100 km ?",
+                options: [
+                    "Réplication synchrone",
+                    "Réplication asynchrone",
+                    "Les deux sont possibles",
+                    "Aucune réplication n'est possible"
+                ],
+                correctAnswers: [1],
+                explanation: "La réplication asynchrone est généralement utilisée pour des distances supérieures à 100 km car elle n'attend pas l'acquittement du site distant pour chaque écriture, évitant l'impact de la latence sur les performances. Elle tolère un certain délai (RPO > 0)."
+            },
+            {
+                id: 89,
+                theme: "DNTA",
+                question: "Quel protocole est utilisé par iSCSI pour la découverte des cibles (targets) ?",
+                options: [
+                    "SLP (Service Location Protocol) ou iSNS (Internet Storage Name Service)",
+                    "DNS",
+                    "DHCP",
+                    "SNMP"
+                ],
+                correctAnswers: [0],
+                explanation: "iSCSI utilise SLP (Service Location Protocol) ou iSNS (Internet Storage Name Service) pour la découverte des cibles (targets). Ces protocoles permettent à un initiateur iSCSI de découvrir dynamiquement les cibles de stockage disponibles sur le réseau."
+            },
+            {
+                id: 90,
+                theme: "IPEX",
+                question: "Quel mécanisme de QoS implémente différentes probabilités de rejet basées sur la classe de trafic ?",
+                options: [
+                    "RED (Random Early Detection)",
+                    "WRED (Weighted Random Early Detection)",
+                    "FIFO",
+                    "Priority Queuing"
+                ],
+                correctAnswers: [1],
+                explanation: "WRED (Weighted Random Early Detection) est une extension de RED qui applique différentes probabilités de rejet (ou marquage) en fonction de la classe de trafic (DSCP ou IP Precedence). Les classes de priorité inférieure sont rejetées plus tôt que les classes prioritaires."
+            },
+            {
+                id: 91,
+                theme: "IPEX",
+                question: "Quel type de VPN crée un tunnel au niveau de la couche liaison (couche 2) ?",
+                options: [
+                    "L2VPN",
+                    "L3VPN",
+                    "L4VPN",
+                    "SSL VPN"
+                ],
+                correctAnswers: [0],
+                explanation: "Un L2VPN (Layer 2 VPN) crée un tunnel au niveau de la couche liaison (couche 2), transportant des trames Ethernet (ou autres protocoles L2) sur un réseau sous-jacent. Exemples : VPLS, VPWS, L2TPv3."
+            },
+            {
+                id: 92,
+                theme: "NEEP",
+                question: "Quel est le principe de base de la téléportation quantique utilisée dans les réseaux quantiques ?",
+                options: [
+                    "Transporter physiquement un qubit à distance",
+                    "Transférer l'état d'un qubit à un autre qubit en utilisant l'intrication et une communication classique",
+                    "Copier un qubit sans limite",
+                    "Accélérer un qubit au-delà de la vitesse de la lumière"
+                ],
+                correctAnswers: [1],
+                explanation: "La téléportation quantique transfère l'état d'un qubit (inconnu) à un qubit distant en utilisant : 1) une paire de qubits intriqués partagée entre l'émetteur et le récepteur, 2) une mesure conjointe sur le qubit à téléporter et un qubit intriqué, 3) l'envoi des résultats de mesure via un canal classique pour permettre la reconstruction de l'état."
+            },
+            {
+                id: 93,
+                theme: "NEEP",
+                question: "Quel est l'avantage de LiFi par rapport au Wi-Fi en termes de sécurité ?",
+                options: [
+                    "Le signal ne traverse pas les murs, limitant les interceptions",
+                    "Il utilise un chiffrement plus fort par défaut",
+                    "Il est inviolable",
+                    "Il n'a pas d'avantage spécifique"
+                ],
+                correctAnswers: [0],
+                explanation: "Comme la lumière ne traverse pas les murs opaques, le signal LiFi est confiné à la pièce, réduisant considérablement les risques d'interception externe (security by confinement). Cela contraste avec le Wi-Fi dont les ondes radio peuvent se propager à l'extérieur du bâtiment."
+            },
+            {
+                id: 94,
+                theme: "DNTA",
+                question: "Quelle est la fonction d'un FC switch dans un SAN ?",
+                options: [
+                    "Router les trames Fibre Channel entre les nœuds",
+                    "Convertir FC en Ethernet",
+                    "Chiffrer les données",
+                    "Compresser les données"
+                ],
+                correctAnswers: [0],
+                explanation: "Un FC switch (commutateur Fibre Channel) dans un SAN a pour fonction principale de router les trames Fibre Channel entre les différents nœuds (serveurs, stockage) en fonction des adresses FC (WWPN). Il forme la base du 'fabric' SAN."
+            },
+            {
+                id: 95,
+                theme: "DNTA",
+                question: "Quelle technologie permet de partitionner logiquement un SAN en plusieurs réseaux virtuels isolés ?",
+                options: [
+                    "Zoning",
+                    "VSAN (Virtual SAN)",
+                    "LUN Masking",
+                    "Les réponses 1 et 2"
+                ],
+                correctAnswers: [3],
+                explanation: "Le Zoning et les VSAN (Virtual SAN) permettent de partitionner un SAN physique en plusieurs réseaux virtuels isolés. Le zoning est basé sur les WWPN ou les adresses, tandis qu'un VSAN est une isolation plus complète avec sa propre topologie de fabric."
+            },
+            {
+                id: 96,
+                theme: "IPEX",
+                question: "Quelle est la principale fonction de l'en-tête AH (Authentication Header) d'IPSec ?",
+                options: [
+                    "Chiffrer les données",
+                    "Authentifier l'origine et assurer l'intégrité des données (sans chiffrement)",
+                    "Compresser les données",
+                    "Gérer les clés"
+                ],
+                correctAnswers: [1],
+                explanation: "L'en-tête AH (Authentication Header) d'IPSec authentifie l'origine du paquet et assure l'intégrité des données (et de parties de l'en-tête IP) via un code d'authentification (MAC), mais ne fournit pas de confidentialité (chiffrement)."
+            },
+            {
+                id: 97,
+                theme: "IPEX",
+                question: "Quel protocole VPN utilise SSL/TLS pour créer un tunnel sécurisé, souvent accessible via un navigateur web ?",
+                options: [
+                    "IPSec",
+                    "SSL VPN (ou TLS VPN)",
+                    "L2TP",
+                    "PPTP"
+                ],
+                correctAnswers: [1],
+                explanation: "Les SSL VPN (ou TLS VPN) utilisent le protocole SSL/TLS (généralement sur le port 443 HTTPS) pour créer un tunnel sécurisé. Ils sont souvent utilisés pour l'accès à distance car ils peuvent être accessibles via un navigateur web sans client dédié (clientless) ou avec un client léger."
+            },
+            {
+                id: 98,
+                theme: "NEEP",
+                question: "Quel est le rôle du protocole ND (Neighbor Discovery) en IPv6 ?",
+                options: [
+                    "Remplacer ARP et gérer l'autoconfiguration",
+                    "Router les paquets",
+                    "Chiffrer le trafic",
+                    "Gérer la QoS"
+                ],
+                correctAnswers: [0],
+                explanation: "Le protocole ND (Neighbor Discovery) en IPv6 remplit plusieurs fonctions dont le remplacement d'ARP (résolution d'adresse L2), l'autoconfiguration des adresses (SLAAC), la détection de doublons (DAD) et la découverte des routeurs (Router Discovery)."
+            },
+            {
+                id: 99,
+                theme: "NEEP",
+                question: "Quelle est la taille de l'espace d'adressage IPv6 ?",
+                options: [
+                    "32 bits",
+                    "64 bits",
+                    "128 bits",
+                    "256 bits"
+                ],
+                correctAnswers: [2],
+                explanation: "IPv6 utilise des adresses de 128 bits, offrant un espace d'adressage énorme (environ 3.4×10^38 adresses), soit largement suffisant pour l'expansion future d'Internet et l'IoT."
+            },
+            {
+                id: 100,
+                theme: "IPEX",
+                question: "Quel mécanisme permet d'éviter la 'synchronisation globale' des flux TCP lors d'une congestion ?",
+                options: [
+                    "Leaky Bucket",
+                    "RED (Random Early Detection)",
+                    "Priority Queuing",
+                    "Token Bucket"
+                ],
+                correctAnswers: [1],
+                explanation: "RED (Random Early Detection) évite la 'synchronisation globale' (global synchronization) où tous les flux TCP réduisent leur fenêtre en même temps après une perte massive, causant une sous-utilisation du lien. RED rejette aléatoirement des paquets avant que la file ne soit pleine, forçant certains flux à réduire leur fenêtre de manière échelonnée."
+            }
+        ];
+
+        // Variables d'état du quiz
+        let currentQuestionIndex = 0;
+        let userAnswers = Array.from({ length: quizData.length }, () => []);
+        let checkedQuestions = new Set(); // Track which questions have been checked
+        let quizCompleted = false;
+        let score = 0;
+
+        // Éléments DOM
+        const quizContainer = document.getElementById('quiz-container');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const checkBtn = document.getElementById('check-btn');
+        const resultsContainer = document.getElementById('results-container');
+        const finalScoreElement = document.getElementById('final-score');
+        const scoreTextElement = document.getElementById('score-text');
+        const restartBtn = document.getElementById('restart-btn');
+        const currentQuestionElement = document.getElementById('current-question');
+        const progressBar = document.getElementById('quiz-progress');
+
+        // Initialisation
+        function init() {
+            displayQuestion(currentQuestionIndex);
+            updateButtons();
+            updateProgressBar();
+        }
+
+        // Afficher la question courante
+        function displayQuestion(index) {
+            const question = quizData[index];
+            currentQuestionElement.textContent = index + 1;
+
+            // Créer le badge de thème
+            let badgeClass = '';
+            if (question.theme === 'NEEP') badgeClass = 'neep-badge';
+            else if (question.theme === 'DNTA') badgeClass = 'dnta-badge';
+            else if (question.theme === 'IPEX') badgeClass = 'ipex-badge';
+
+            const badgeHTML = `<span class="theme-badge ${badgeClass}">${question.theme}</span>`;
+
+            // Créer les options
+            let optionsHTML = '';
+            question.options.forEach((option, optionIndex) => {
+                const isSelected = userAnswers[index].includes(optionIndex);
+                const isChecked = isSelected ? 'checked' : '';
+                optionsHTML += `
+                    <div class="option" data-index="${optionIndex}">
+                        <input type="${question.correctAnswers.length > 1 ? 'checkbox' : 'radio'}" 
+                               name="question-${index}" 
+                               id="option-${index}-${optionIndex}" 
+                               value="${optionIndex}" 
+                               ${isChecked}
+                               ${quizCompleted ? 'disabled' : ''}>
+                        <label for="option-${index}-${optionIndex}">${option}</label>
+                    </div>
+                `;
+            });
+
+            // Afficher la question
+            quizContainer.innerHTML = `
+                <div class="question-container">
+                    ${badgeHTML}
+                    <div class="question-number">Question ${index + 1} / ${quizData.length}</div>
+                    <div class="question-text">${question.question}</div>
+                    <div class="options-container" id="options-container">
+                        ${optionsHTML}
+                    </div>
+                    <div class="explanation" id="explanation-${index}">
+                        <strong>Explication :</strong> ${question.explanation}
+                    </div>
+                    ${question.correctAnswers.length > 1 ?
+                    '<div class="multi-warning" id="multi-warning">Cette question accepte plusieurs réponses</div>' :
+                    ''}
+                </div>
+            `;
+
+            // Gérer les sélections d'options
+            const options = document.querySelectorAll('.option');
+            options.forEach(option => {
+                option.addEventListener('click', function (e) {
+                    if (quizCompleted) return;
+
+                    const input = this.querySelector('input');
+                    const questionIndex = index;
+                    const optionIndex = parseInt(this.getAttribute('data-index'));
+
+                    if (question.correctAnswers.length > 1) {
+                        // Question à réponses multiples
+                        input.checked = !input.checked;
+
+                        if (input.checked) {
+                            if (!userAnswers[questionIndex].includes(optionIndex)) {
+                                userAnswers[questionIndex].push(optionIndex);
+                            }
+                        } else {
+                            userAnswers[questionIndex] = userAnswers[questionIndex].filter(i => i !== optionIndex);
+                        }
+                    } else {
+                        // Question à réponse unique
+                        options.forEach(opt => {
+                            const optInput = opt.querySelector('input');
+                            optInput.checked = false;
+                        });
+                        input.checked = true;
+                        userAnswers[questionIndex] = [optionIndex];
+                    }
+
+                    // Mettre à jour les styles des options sélectionnées
+                    updateOptionStyles(index);
+                });
+            });
+
+            // Afficher l'avertissement pour les questions multiples
+            if (question.correctAnswers.length > 1) {
+                document.getElementById('multi-warning').style.display = 'block';
+            }
+
+            // Si la question a déjà été vérifiée, afficher les corrections
+            if (checkedQuestions.has(index)) {
+                showAnswer(index);
+            }
+
+            // Mettre à jour les styles initiaux des options sélectionnées
+            updateOptionStyles(index);
+        }
+
+        // Mettre à jour les styles des options sélectionnées
+        function updateOptionStyles(questionIndex) {
+            const options = document.querySelectorAll('.option');
+            options.forEach(option => {
+                const input = option.querySelector('input');
+                const optionIndex = parseInt(option.getAttribute('data-index'));
+
+                option.classList.remove('selected');
+
+                if (input.checked) {
+                    option.classList.add('selected');
+                }
+            });
+        }
+
+        // Afficher la réponse et l'explication
+        function showAnswer(questionIndex) {
+            const question = quizData[questionIndex];
+            const options = document.querySelectorAll('.option');
+            const explanation = document.getElementById(`explanation-${questionIndex}`);
+
+            // Marquer les bonnes et mauvaises réponses
+            options.forEach(option => {
+                const optionIndex = parseInt(option.getAttribute('data-index'));
+                const isCorrect = question.correctAnswers.includes(optionIndex);
+                const isSelected = userAnswers[questionIndex].includes(optionIndex);
+
+                option.classList.remove('correct', 'incorrect');
+
+                if (isCorrect) {
+                    option.classList.add('correct');
+                } else if (isSelected && !isCorrect) {
+                    option.classList.add('incorrect');
+                }
+            });
+
+            // Afficher l'explication
+            explanation.classList.add('show');
+
+            // Marquer cette question comme vérifiée
+            checkedQuestions.add(questionIndex);
+
+            // Désactiver les inputs
+            const inputs = document.querySelectorAll('input');
+            inputs.forEach(input => {
+                input.disabled = true;
+            });
+        }
+
+        // Vérifier la réponse
+        function checkAnswer() {
+            const question = quizData[currentQuestionIndex];
+            const userAnswer = userAnswers[currentQuestionIndex];
+
+            // Vérifier si l'utilisateur a répondu
+            if (userAnswer.length === 0) {
+                alert('Veuillez sélectionner une réponse avant de vérifier.');
+                return;
+            }
+
+            showAnswer(currentQuestionIndex);
+        }
+
+        // Passer à la question suivante
+        function nextQuestion() {
+            if (currentQuestionIndex < quizData.length - 1) {
+                currentQuestionIndex++;
+                displayQuestion(currentQuestionIndex);
+                updateButtons();
+                updateProgressBar();
+            } else {
+                finishQuiz();
+            }
+        }
+
+        // Revenir à la question précédente
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                displayQuestion(currentQuestionIndex);
+                updateButtons();
+                updateProgressBar();
+            }
+        }
+
+        // Mettre à jour l'état des boutons
+        function updateButtons() {
+            prevBtn.disabled = currentQuestionIndex === 0;
+            nextBtn.textContent = currentQuestionIndex === quizData.length - 1 ? 'Terminer ✓' : 'Suivante →';
+
+            // Si on a répondu à la question courante, le bouton "Vérifier" est désactivé
+            const explanation = document.getElementById(`explanation-${currentQuestionIndex}`);
+            if (explanation && explanation.classList.contains('show')) {
+                checkBtn.disabled = true;
+            } else {
+                checkBtn.disabled = false;
+            }
+        }
+
+        // Mettre à jour la barre de progression
+        function updateProgressBar() {
+            const progress = ((currentQuestionIndex + 1) / quizData.length) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        // Terminer le quiz et afficher les résultats
+        function finishQuiz() {
+            quizCompleted = true;
+
+            // Calculer le score
+            score = 0;
+            for (let i = 0; i < quizData.length; i++) {
+                const question = quizData[i];
+                const userAnswer = userAnswers[i];
+
+                // Pour les questions à réponse unique
+                if (question.correctAnswers.length === 1) {
+                    if (userAnswer.length === 1 && userAnswer[0] === question.correctAnswers[0]) {
+                        score++;
+                    }
+                }
+                // Pour les questions à réponses multiples
+                else {
+                    // Toutes les bonnes réponses doivent être sélectionnées, et aucune mauvaise réponse ne doit l'être
+                    const allCorrectSelected = question.correctAnswers.every(correct => userAnswer.includes(correct));
+                    const noIncorrectSelected = userAnswer.every(answer => question.correctAnswers.includes(answer));
+
+                    if (allCorrectSelected && noIncorrectSelected && userAnswer.length === question.correctAnswers.length) {
+                        score++;
+                    }
+                }
+            }
+
+            // Afficher les résultats
+            finalScoreElement.textContent = `${score}/${quizData.length}`;
+
+            // Afficher un message selon le score
+            let message = '';
+            if (score >= 90) {
+                message = 'Excellent ! Vous maîtrisez parfaitement les concepts.';
+            } else if (score >= 70) {
+                message = 'Bon travail ! Vous avez une bonne compréhension des sujets.';
+            } else if (score >= 50) {
+                message = 'Pas mal ! Poursuivez vos révisions pour consolider vos connaissances.';
+            } else {
+                message = 'Continuez à étudier, vous progresserez rapidement !';
+            }
+
+            scoreTextElement.textContent = message;
+
+            // Afficher le conteneur de résultats
+            resultsContainer.classList.add('show');
+            quizContainer.style.display = 'none';
+            document.querySelector('.buttons-container').style.display = 'none';
+            document.querySelector('.question-counter').style.display = 'none';
+            document.querySelector('.progress-bar').style.display = 'none';
+        }
+
+        // Redémarrer le quiz
+        function restartQuiz() {
+            currentQuestionIndex = 0;
+            userAnswers = Array.from({ length: quizData.length }, () => []);
+            checkedQuestions = new Set();
+            quizCompleted = false;
+            score = 0;
+
+            // Réinitialiser l'affichage
+            resultsContainer.classList.remove('show');
+            quizContainer.style.display = 'block';
+            document.querySelector('.buttons-container').style.display = 'flex';
+            document.querySelector('.question-counter').style.display = 'block';
+            document.querySelector('.progress-bar').style.display = 'block';
+
+            // Réinitialiser l'affichage
+            displayQuestion(currentQuestionIndex);
+            updateButtons();
+            updateProgressBar();
+        }
+
+        // Événements des boutons
+        prevBtn.addEventListener('click', prevQuestion);
+        nextBtn.addEventListener('click', nextQuestion);
+        checkBtn.addEventListener('click', checkAnswer);
+        restartBtn.addEventListener('click', restartQuiz);
+
+        // Initialiser le quiz
+        init();
+    </script>
+</body>
+
+</html>
