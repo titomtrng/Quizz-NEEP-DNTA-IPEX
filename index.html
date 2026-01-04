@@ -1930,6 +1930,414 @@
                 ],
                 correctAnswers: [1],
                 explanation: "RED (Random Early Detection) évite la 'synchronisation globale' (global synchronization) où tous les flux TCP réduisent leur fenêtre en même temps après une perte massive, causant une sous-utilisation du lien. RED rejette aléatoirement des paquets avant que la file ne soit pleine, forçant certains flux à réduire leur fenêtre de manière échelonnée."
+            },
+            // ===== NOUVELLES QUESTIONS À AJOUTER =====
+            // Copiez ce bloc dans le tableau quizData après la question 100
+
+            // --- SNMP (IPEX) ---
+            {
+                id: 101,
+                theme: "IPEX",
+                question: "Quel protocole de transport et quelle direction de communication sont utilisés par les messages SNMP Trap ?",
+                options: [
+                    "UDP, agent → superviseur",
+                    "TCP, superviseur → agent",
+                    "UDP, superviseur → agent",
+                    "TCP, agent → superviseur"
+                ],
+                correctAnswers: [0],
+                explanation: "Les Traps SNMPv1/v2 sont émis par les agents vers le superviseur (manager) via UDP port 162, sans accusé de réception, pour signaler des événements asynchrones."
+            },
+            {
+                id: 102,
+                theme: "IPEX",
+                question: "Quelle amélioration SNMPv2c apporte-t-il par rapport à SNMPv1 concernant la récupération de tables ?",
+                options: [
+                    "Le message GetBulk pour récupérer plusieurs lignes en une requête",
+                    "Le chiffrement des données",
+                    "L'authentification forte",
+                    "Les notifications confirmées"
+                ],
+                correctAnswers: [0],
+                explanation: "SNMPv2c introduit GetBulkRequest qui permet de récupérer efficacement de grandes tables en une seule requête, réduisant le nombre d'allers-retours réseau par rapport aux GetNext successifs de v1."
+            },
+            {
+                id: 103,
+                theme: "IPEX",
+                question: "Quelle version de SNMP introduit l'authentification et le chiffrement des messages ?",
+                options: [
+                    "SNMPv1",
+                    "SNMPv2c",
+                    "SNMPv3",
+                    "SNMPv2p"
+                ],
+                correctAnswers: [2],
+                explanation: "SNMPv3 introduit le modèle USM (User-based Security Model) avec authentification (HMAC-MD5/SHA) et chiffrement (DES/AES) des messages, contrairement aux versions précédentes qui utilisaient une simple chaîne 'community'."
+            },
+
+            // --- Mobile IP (IPEX) ---
+            {
+                id: 104,
+                theme: "IPEX",
+                question: "Dans Mobile IPv4, qu'envoie le Mobile Node au Home Agent lorsqu'il arrive sur un réseau étranger ?",
+                options: [
+                    "Un Agent Advertisement",
+                    "Un Registration Request contenant la Care-of Address",
+                    "Un Binding Update",
+                    "Un Router Solicitation"
+                ],
+                correctAnswers: [1],
+                explanation: "Le Mobile Node envoie un Registration Request au Home Agent (via le Foreign Agent ou directement) contenant sa Care-of Address actuelle. Le HA met à jour sa table de correspondance et confirme avec un Registration Reply."
+            },
+            {
+                id: 105,
+                theme: "IPEX",
+                question: "Comment le Home Agent intercepte-t-il les paquets destinés à un Mobile Node absent de son réseau d'origine ?",
+                options: [
+                    "Par un tunnel GRE vers le Foreign Agent",
+                    "Par Proxy ARP, en répondant aux requêtes ARP pour l'adresse du MN",
+                    "Par modification des tables BGP",
+                    "Par redirection ICMP"
+                ],
+                correctAnswers: [1],
+                explanation: "Le Home Agent utilise Proxy ARP pour intercepter les paquets destinés à la Home Address du Mobile Node. Il répond aux requêtes ARP avec sa propre adresse MAC, puis encapsule les paquets reçus vers la Care-of Address."
+            },
+            {
+                id: 106,
+                theme: "IPEX",
+                question: "Quel type d'adresse n'existe PAS dans Mobile IPv4 ?",
+                options: [
+                    "Home Address",
+                    "Care-of Address",
+                    "Correspondent Address",
+                    "Binding Address"
+                ],
+                correctAnswers: [3],
+                explanation: "Mobile IPv4 utilise la Home Address (adresse permanente du MN), la Care-of Address (adresse temporaire sur le réseau visité), et l'adresse du Correspondent Node. 'Binding Address' n'est pas un terme utilisé."
+            },
+
+            // --- QoS (IPEX) ---
+            {
+                id: 107,
+                theme: "IPEX",
+                question: "Quelle valeur DSCP correspond au traitement Best Effort (par défaut) ?",
+                options: [
+                    "000000 (0)",
+                    "101110 (46)",
+                    "001010 (10)",
+                    "011000 (24)"
+                ],
+                correctAnswers: [0],
+                explanation: "Le DSCP 000000 (0 en décimal) correspond au traitement Best Effort, le comportement par défaut pour le trafic sans priorité particulière. C'est le PHB 'Default' de DiffServ."
+            },
+            {
+                id: 108,
+                theme: "IPEX",
+                question: "Quel PHB DiffServ garantit un débit minimum tout en permettant d'autres trafics de partager la bande passante restante ?",
+                options: [
+                    "EF (Expedited Forwarding)",
+                    "AF (Assured Forwarding)",
+                    "BE (Best Effort)",
+                    "CS (Class Selector)"
+                ],
+                correctAnswers: [1],
+                explanation: "AF (Assured Forwarding) garantit un débit minimum à une classe de trafic. Le trafic excédentaire peut être transmis si la bande passante le permet, mais sera abandonné en priorité en cas de congestion (via WRED)."
+            },
+            {
+                id: 109,
+                theme: "IPEX",
+                question: "Quelle est la signification de AF31 dans la nomenclature DiffServ ?",
+                options: [
+                    "Assured Forwarding, classe 3, priorité de rejet basse (1)",
+                    "Assured Forwarding, classe 3, priorité de rejet haute (1)",
+                    "Assured Forwarding, classe 1, priorité 3",
+                    "Audio Forwarding niveau 31"
+                ],
+                correctAnswers: [0],
+                explanation: "AFxy signifie Assured Forwarding classe x avec priorité de rejet y. AF31 = classe 3, priorité de rejet 1 (basse). Plus y est élevé, plus les paquets sont susceptibles d'être rejetés en cas de congestion."
+            },
+            {
+                id: 110,
+                theme: "IPEX",
+                question: "Quel mécanisme QoS utilise un 'seau percé' pour lisser le trafic à un débit constant ?",
+                options: [
+                    "Token Bucket",
+                    "Leaky Bucket",
+                    "RED",
+                    "WFQ"
+                ],
+                correctAnswers: [1],
+                explanation: "Le Leaky Bucket (seau percé) lisse le trafic en le faisant sortir à un débit constant, absorbant les rafales dans le seau. Contrairement au Token Bucket, il ne permet pas de rafales en sortie."
+            },
+
+            // --- SAN et Stockage (DNTA) ---
+            {
+                id: 111,
+                theme: "DNTA",
+                question: "Quel protocole permet d'adresser les équipements Fibre Channel de manière unique au niveau mondial ?",
+                options: [
+                    "WWPN (World Wide Port Name)",
+                    "MAC Address",
+                    "IP Address",
+                    "LUN"
+                ],
+                correctAnswers: [0],
+                explanation: "Le WWPN (World Wide Port Name) est un identifiant unique de 64 bits assigné à chaque port Fibre Channel, similaire à une adresse MAC pour Ethernet. Il est utilisé pour le zoning et l'authentification."
+            },
+            {
+                id: 112,
+                theme: "DNTA",
+                question: "Quelle classe de service Fibre Channel offre un service sans connexion, sans accusé de réception, pour un maximum de performances ?",
+                options: [
+                    "Classe 1",
+                    "Classe 2",
+                    "Classe 3",
+                    "Classe 4"
+                ],
+                correctAnswers: [2],
+                explanation: "La Classe 3 FC est un service sans connexion (datagramme) sans accusé de réception niveau trame. C'est la classe la plus utilisée dans les SAN modernes car elle offre les meilleures performances avec le contrôle d'erreur géré par les couches supérieures."
+            },
+            {
+                id: 113,
+                theme: "DNTA",
+                question: "Quel est le principal avantage de FCoE par rapport à FCIP ?",
+                options: [
+                    "FCoE permet la convergence réseau/stockage sur un même câble Ethernet",
+                    "FCIP est plus rapide",
+                    "FCoE fonctionne sur de plus longues distances",
+                    "FCIP ne nécessite pas de switches spéciaux"
+                ],
+                correctAnswers: [0],
+                explanation: "FCoE (Fibre Channel over Ethernet) permet de faire converger le trafic réseau LAN et stockage SAN sur une même infrastructure Ethernet 10/25/40G, réduisant le câblage et les coûts. FCIP est destiné à l'extension WAN."
+            },
+            {
+                id: 114,
+                theme: "DNTA",
+                question: "Si une entreprise a un RPO de 4 heures, que signifie cela ?",
+                options: [
+                    "Elle peut perdre au maximum 4 heures de données",
+                    "Elle doit restaurer ses systèmes en 4 heures maximum",
+                    "Ses sauvegardes sont conservées 4 heures",
+                    "Son datacenter de backup est à 4 heures de distance"
+                ],
+                correctAnswers: [0],
+                explanation: "Le RPO (Recovery Point Objective) de 4 heures signifie que l'entreprise accepte de perdre au maximum 4 heures de données. Cela implique des sauvegardes/réplications au moins toutes les 4 heures."
+            },
+            {
+                id: 115,
+                theme: "DNTA",
+                question: "Quel niveau RAID offre la meilleure performance en écriture mais aucune tolérance aux pannes ?",
+                options: [
+                    "RAID 0",
+                    "RAID 1",
+                    "RAID 5",
+                    "RAID 6"
+                ],
+                correctAnswers: [0],
+                explanation: "RAID 0 (striping) répartit les données sur tous les disques sans redondance, offrant les meilleures performances en lecture/écriture. Cependant, la panne d'un seul disque entraîne la perte totale des données."
+            },
+
+            // --- VPN (IPEX) ---
+            {
+                id: 116,
+                theme: "IPEX",
+                question: "Quelles sont les deux phases d'établissement d'un tunnel IPSec avec IKE ? (2 réponses)",
+                options: [
+                    "Phase 1 : établissement de l'IKE SA (canal sécurisé)",
+                    "Phase 2 : négociation des IPSec SA pour le trafic utilisateur",
+                    "Phase 3 : échange des certificats",
+                    "Phase 0 : vérification de la connectivité"
+                ],
+                correctAnswers: [0, 1],
+                explanation: "IKE fonctionne en 2 phases : Phase 1 établit un canal sécurisé (IKE SA) pour protéger les négociations. Phase 2 utilise ce canal pour négocier les IPSec SA qui protégeront le trafic réel."
+            },
+            {
+                id: 117,
+                theme: "IPEX",
+                question: "Quel identifiant VXLAN permet de segmenter jusqu'à 16 millions de réseaux virtuels ?",
+                options: [
+                    "VLAN ID (12 bits)",
+                    "VNI - VXLAN Network Identifier (24 bits)",
+                    "MPLS Label (20 bits)",
+                    "GRE Key (32 bits)"
+                ],
+                correctAnswers: [1],
+                explanation: "Le VNI (VXLAN Network Identifier) utilise 24 bits, permettant environ 16 millions de segments réseau (2^24), bien plus que les 4096 VLANs traditionnels (2^12)."
+            },
+            {
+                id: 118,
+                theme: "IPEX",
+                question: "Quel port UDP est utilisé par défaut pour VXLAN ?",
+                options: [
+                    "443",
+                    "1701",
+                    "4789",
+                    "8080"
+                ],
+                correctAnswers: [2],
+                explanation: "VXLAN utilise le port UDP 4789 par défaut (IANA assigned). Les trames Ethernet sont encapsulées dans UDP/IP, permettant leur transport sur des réseaux IP sous-jacents."
+            },
+            {
+                id: 119,
+                theme: "IPEX",
+                question: "Quelle combinaison de protocoles est couramment utilisée pour sécuriser L2TP ?",
+                options: [
+                    "L2TP seul (chiffrement intégré)",
+                    "L2TP/IPSec",
+                    "L2TP/TLS",
+                    "L2TP/GRE"
+                ],
+                correctAnswers: [1],
+                explanation: "L2TP ne fournit pas de chiffrement natif. Il est généralement combiné avec IPSec (L2TP/IPSec) pour assurer la confidentialité et l'intégrité. IPSec encapsule les paquets L2TP dans ESP."
+            },
+
+            // --- Protocoles émergents (NEEP) ---
+            {
+                id: 120,
+                theme: "NEEP",
+                question: "Quel problème de TCP la technologie QUIC résout-elle grâce au multiplexage de streams ?",
+                options: [
+                    "La fragmentation IP",
+                    "Le Head-of-Line Blocking (blocage en tête de file)",
+                    "La congestion réseau",
+                    "L'épuisement des ports"
+                ],
+                correctAnswers: [1],
+                explanation: "En TCP, une perte de paquet bloque tous les flux multiplexés (HTTP/2). QUIC résout ce Head-of-Line Blocking car chaque stream est indépendant : une perte sur un stream n'affecte pas les autres."
+            },
+            {
+                id: 121,
+                theme: "NEEP",
+                question: "Quel niveau de QoS MQTT garantit une livraison exactement une fois ?",
+                options: [
+                    "QoS 0 (At most once)",
+                    "QoS 1 (At least once)",
+                    "QoS 2 (Exactly once)",
+                    "QoS 3 (Guaranteed)"
+                ],
+                correctAnswers: [2],
+                explanation: "QoS 2 MQTT utilise un handshake en 4 étapes (PUBLISH/PUBREC/PUBREL/PUBCOMP) pour garantir une livraison exactement une fois, sans doublon ni perte. C'est le niveau le plus fiable mais le plus lent."
+            },
+            {
+                id: 122,
+                theme: "NEEP",
+                question: "Quelle méthode CoAP permet d'observer les changements d'une ressource en continu ?",
+                options: [
+                    "GET avec option Observe",
+                    "SUBSCRIBE",
+                    "WATCH",
+                    "NOTIFY"
+                ],
+                correctAnswers: [0],
+                explanation: "CoAP utilise l'option 'Observe' sur une requête GET pour s'abonner aux changements d'une ressource. Le serveur envoie ensuite des notifications automatiques quand la ressource change, sans requêtes répétées."
+            },
+            {
+                id: 123,
+                theme: "NEEP",
+                question: "Quel mécanisme 6LoWPAN utilise-t-il pour réduire la taille des en-têtes IPv6 sur les réseaux contraints ?",
+                options: [
+                    "Fragmentation uniquement",
+                    "Compression d'en-tête (IPHC/NHC)",
+                    "Tunneling vers IPv4",
+                    "Réduction du MTU"
+                ],
+                correctAnswers: [1],
+                explanation: "6LoWPAN utilise IPHC (IP Header Compression) et NHC (Next Header Compression) pour compresser les en-têtes IPv6 de 40 octets à parfois 2-3 octets, essentiel pour les petites trames 802.15.4 (127 octets max)."
+            },
+
+            // --- Réseaux quantiques (NEEP) ---
+            {
+                id: 124,
+                theme: "NEEP",
+                question: "Pourquoi la QKD (Quantum Key Distribution) est-elle considérée comme théoriquement inviolable ?",
+                options: [
+                    "Les clés sont très longues",
+                    "Toute interception modifie l'état quantique et est détectable",
+                    "Le chiffrement quantique est plus rapide",
+                    "Les ordinateurs quantiques ne peuvent pas casser leurs propres codes"
+                ],
+                correctAnswers: [1],
+                explanation: "La QKD repose sur le principe quantique que toute mesure perturbe l'état d'un qubit. Un espion (Eve) qui intercepte les photons modifie inévitablement leur état, ce qui est détectable par les parties légitimes (taux d'erreur anormal)."
+            },
+            {
+                id: 125,
+                theme: "NEEP",
+                question: "Qu'est-ce qu'un répéteur quantique et pourquoi est-il nécessaire ?",
+                options: [
+                    "Un amplificateur de signal optique standard",
+                    "Un dispositif qui étend l'intrication sur de longues distances via l'échange d'intrication",
+                    "Un convertisseur quantique-classique",
+                    "Un routeur pour qubits"
+                ],
+                correctAnswers: [1],
+                explanation: "Les répéteurs quantiques utilisent l'échange d'intrication (entanglement swapping) pour étendre les corrélations quantiques sur de longues distances, car on ne peut pas simplement amplifier des qubits sans les détruire (no-cloning theorem)."
+            },
+
+            // --- Routage avancé (IPEX/NEEP) ---
+            {
+                id: 126,
+                theme: "IPEX",
+                question: "Quel protocole de routage multicast utilise des arbres partagés (Shared Trees) centrés sur un Rendezvous Point ?",
+                options: [
+                    "PIM Dense Mode",
+                    "PIM Sparse Mode",
+                    "DVMRP",
+                    "MOSPF"
+                ],
+                correctAnswers: [1],
+                explanation: "PIM Sparse Mode (PIM-SM) utilise un Rendezvous Point (RP) comme racine d'un arbre partagé. Les sources envoient au RP, qui distribue aux récepteurs. C'est efficace pour les groupes avec peu de membres dispersés."
+            },
+            {
+                id: 127,
+                theme: "IPEX",
+                question: "En IPv6, quel préfixe identifie une adresse link-local ?",
+                options: [
+                    "2000::/3",
+                    "fe80::/10",
+                    "ff00::/8",
+                    "fc00::/7"
+                ],
+                correctAnswers: [1],
+                explanation: "Les adresses link-local IPv6 utilisent le préfixe fe80::/10. Elles sont automatiquement configurées sur chaque interface et ne sont valides que sur le lien local (non routables)."
+            },
+            {
+                id: 128,
+                theme: "NEEP",
+                question: "Quelle technologie LPWAN offre le meilleur compromis portée/débit pour l'IoT urbain avec un modèle opérateur ?",
+                options: [
+                    "LoRaWAN (privé/public)",
+                    "Sigfox",
+                    "NB-IoT (opéré par les telcos)",
+                    "Zigbee"
+                ],
+                correctAnswers: [2],
+                explanation: "NB-IoT (Narrowband IoT) est déployé par les opérateurs mobiles sur leurs bandes LTE. Il offre une bonne couverture indoor, un débit supérieur à Sigfox/LoRa, et bénéficie de l'infrastructure existante des telcos."
+            },
+            {
+                id: 129,
+                theme: "DNTA",
+                question: "Quelle technologie DCB (Data Center Bridging) permet de contrôler le flux Ethernet pour éviter les pertes sur FCoE ?",
+                options: [
+                    "PFC (Priority-based Flow Control)",
+                    "ETS (Enhanced Transmission Selection)",
+                    "DCBX (DCB Exchange Protocol)",
+                    "802.1Q VLAN"
+                ],
+                correctAnswers: [0],
+                explanation: "PFC (Priority-based Flow Control, 802.1Qbb) permet de suspendre le trafic d'une classe de priorité spécifique sans affecter les autres. C'est essentiel pour FCoE qui nécessite un réseau 'lossless' comme Fibre Channel natif."
+            },
+            {
+                id: 130,
+                theme: "IPEX",
+                question: "Quel attribut BGP est utilisé pour éviter les boucles de routage entre systèmes autonomes ?",
+                options: [
+                    "LOCAL_PREF",
+                    "MED",
+                    "AS_PATH",
+                    "NEXT_HOP"
+                ],
+                correctAnswers: [2],
+                explanation: "L'attribut AS_PATH contient la liste des AS traversés. Un routeur BGP rejette les annonces contenant déjà son propre AS, évitant ainsi les boucles de routage inter-AS."
             }
         ];
 
